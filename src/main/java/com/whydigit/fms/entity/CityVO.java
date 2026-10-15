@@ -47,6 +47,7 @@ public class CityVO {
 	@Column(name = "cancel")
 	private boolean cancel;
 
+	
 	@JsonGetter("active")
 	public String getActive() {
 		return active ? "Active" : "In-Active";
