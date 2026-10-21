@@ -1,6 +1,7 @@
 package com.whydigit.fms.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.whydigit.fms.ResponseDTO.BranchResponseDTO;
+import com.whydigit.fms.ResponseDTO.FinancialYearResponseDTO;
+import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
 import com.whydigit.fms.dto.CityDTO;
 import com.whydigit.fms.dto.CompanyDTO;
 import com.whydigit.fms.dto.CountryDTO;
@@ -25,6 +29,7 @@ import com.whydigit.fms.dto.CurrencyDTO;
 import com.whydigit.fms.dto.DepartmentDTO;
 import com.whydigit.fms.dto.DesignationDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
+import com.whydigit.fms.dto.GlobalParameterDTO;
 import com.whydigit.fms.dto.Role;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
@@ -43,6 +48,7 @@ import com.whydigit.fms.entity.StateVO;
 import com.whydigit.fms.entity.UserProfileInformationVO;
 import com.whydigit.fms.entity.UserVO;
 import com.whydigit.fms.exception.ApplicationException;
+import com.whydigit.fms.repo.BranchRepo;
 import com.whydigit.fms.repo.CityRepo;
 import com.whydigit.fms.repo.CompanyRepo;
 import com.whydigit.fms.repo.CountryRepository;
@@ -80,7 +86,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Autowired
 	CityRepo cityRepo;
 
-
 	@Autowired
 	ScreenNamesRepo screenNamesRepo;
 
@@ -96,7 +101,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Autowired
 	GlobalParameterRepo globalParameterRepo;
 
-	
 	@Autowired
 	UserBranchAccessRepo userBranchAccessRepo;
 
@@ -106,7 +110,8 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Autowired
 	EmployeeRepo employeeRepo;
 
-
+	@Autowired
+	BranchRepo branchRepo;
 	@Autowired
 	DesignationRepo designationRepo;
 
@@ -417,8 +422,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 		cityRepo.deleteById(cityid);
 	}
 
-	
-
 	// Company
 
 	@Override
@@ -706,34 +709,103 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 
 	// Change Global Parameter or update Parameters
 	@Override
-	public GlobalParameterVO updateGlobaParameter(GlobalParameterVO globalParameterVO) {
+	public GlobalParameterResponseDTO updateGlobaParameter(GlobalParameterDTO globalParameterDTO) {
 
-		GlobalParameterVO existingRecord = globalParameterRepo.findGlobalParam(globalParameterVO.getOrgId(),
-				globalParameterVO.getUserid());
+		GlobalParameterVO existingRecord = globalParameterRepo.findGlobalParam(globalParameterDTO.getOrgId(),
+				globalParameterDTO.getUserid());
+
+		GlobalParameterVO savedRecord;
 
 		if (existingRecord != null) {
-			// If the record exists, it's a PUT operation
-			existingRecord.setBranch(globalParameterVO.getBranch());
-			existingRecord.setBranchcode(globalParameterVO.getBranchcode());
-			existingRecord.setCustomer(globalParameterVO.getCustomer());
-			existingRecord.setClient(globalParameterVO.getClient());
-			existingRecord.setWarehouse(globalParameterVO.getWarehouse());
-			existingRecord.setOrgId(globalParameterVO.getOrgId());
-			existingRecord.setUserid(globalParameterVO.getUserid());
 
-			return globalParameterRepo.save(existingRecord);
+			// Update existing record
+			existingRecord.setOrgId(globalParameterDTO.getOrgId());
+			existingRecord.setUserid(globalParameterDTO.getUserid());
+
+			existingRecord.setBranch(branchRepo.findById(globalParameterDTO.getBranch())
+					.orElseThrow(() -> new RuntimeException("Branch Not Found")));
+
+			existingRecord.setFinancialYear(financialYearRepo.findById(globalParameterDTO.getFinancialYear())
+					.orElseThrow(() -> new RuntimeException("Financial Year Not Found")));
+
+			savedRecord = globalParameterRepo.save(existingRecord);
+
 		} else {
-			// If the record doesn't exist, it's a POST operation
-			return globalParameterRepo.save(globalParameterVO);
+
+			// Create new record
+			GlobalParameterVO globalParameterVO = new GlobalParameterVO();
+
+			globalParameterVO.setOrgId(globalParameterDTO.getOrgId());
+			globalParameterVO.setUserid(globalParameterDTO.getUserid());
+
+			globalParameterVO.setBranch(branchRepo.findById(globalParameterDTO.getBranch())
+					.orElseThrow(() -> new RuntimeException("Branch Not Found")));
+
+			globalParameterVO.setFinancialYear(financialYearRepo.findById(globalParameterDTO.getFinancialYear())
+					.orElseThrow(() -> new RuntimeException("Financial Year Not Found")));
+
+			savedRecord = globalParameterRepo.save(globalParameterVO);
 		}
 
+		return convertToGlobalParameterResponse(savedRecord);
+	}
+
+	private GlobalParameterResponseDTO convertToGlobalParameterResponse(GlobalParameterVO vo) {
+
+		GlobalParameterResponseDTO dto = new GlobalParameterResponseDTO();
+
+		dto.setId(vo.getId());
+		dto.setOrgId(vo.getOrgId());
+		dto.setUserid(vo.getUserid());
+
+		// Branch mapping
+		if (vo.getBranch() != null) {
+
+			BranchResponseDTO branchDTO = new BranchResponseDTO();
+
+			branchDTO.setId(vo.getBranch().getId());
+			branchDTO.setBranch(vo.getBranch().getBranch());
+			branchDTO.setBranchCode(vo.getBranch().getBranchCode());
+
+			dto.setBranch(branchDTO);
+		}
+
+		// Financial year mapping
+		if (vo.getFinancialYear() != null) {
+
+			FinancialYearResponseDTO financialYearDTO = new FinancialYearResponseDTO();
+
+			financialYearDTO.setId(vo.getFinancialYear().getId());
+			financialYearDTO.setFinYear(vo.getFinancialYear().getFinYear());
+
+			dto.setFinancialYear(financialYearDTO);
+		}
+
+		return dto;
 	}
 
 	// get access Branch
 	@Override
-	public Set<Object[]> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(Long orgid, String userName) {
+	public List<Map<String, Object>> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(
+	        Long orgid, String userName) {
 
-		return userBranchAccessRepo.findGlobalParametersBranchByUserName(orgid, userName);
+	    List<Object[]> result = userBranchAccessRepo
+	            .findGlobalParametersBranchByUserName(orgid, userName);
+
+	    List<Map<String, Object>> responseList = new ArrayList<>();
+
+	    for (Object[] row : result) {
+
+	        Map<String, Object> map = new HashMap<>();
+
+	        map.put("branchId", ((Number) row[0]).longValue());
+	        map.put("branch", row[1]);
+	        map.put("branchCode", row[2]);
+
+	        responseList.add(map);
+	    }
+
+	    return responseList;
 	}
 
 //	@Override
@@ -1145,6 +1217,5 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	public UserProfileInformationVO getProfileInformationByUserId(Long id) {
 		return userProfileInformationRepo.getProfileInformationByUserId(id);
 	}
-
 
 }

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
 import com.whydigit.fms.common.CommonConstant;
 import com.whydigit.fms.common.UserConstants;
 import com.whydigit.fms.dto.CityDTO;
@@ -32,6 +33,7 @@ import com.whydigit.fms.dto.CurrencyDTO;
 import com.whydigit.fms.dto.DepartmentDTO;
 import com.whydigit.fms.dto.DesignationDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
+import com.whydigit.fms.dto.GlobalParameterDTO;
 import com.whydigit.fms.dto.ResponseDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
@@ -520,44 +522,43 @@ public class CommonMasterController extends BaseController {
 	// Global Parameter
 
 	@GetMapping("/globalparamBranchByUserName")
-	public ResponseEntity<ResponseDTO> getGlobalParameterBranchByUserName(@RequestParam Long orgid,
-			@RequestParam String userName) {
-		String methodName = "getAllGlobalParameterByUserName()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		Set<Object[]> globalParameters = new HashSet<>();
-		try {
-			globalParameters = commonMasterService.getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(orgid,
-					userName);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
-		if (StringUtils.isBlank(errorMsg)) {
-			List<Map<String, String>> formattedParameters = formattParameter(globalParameters);
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE,
-					"Global Parameter Branch information get successfully");
-			responseObjectsMap.put("GlopalParameters", formattedParameters);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap,
-					"Global Parameter Branch information receive failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
-	}
+	public ResponseEntity<ResponseDTO> getGlobalParameterBranchByUserName(
+	        @RequestParam Long orgid,
+	        @RequestParam String userName) {
 
-	private List<Map<String, String>> formattParameter(Set<Object[]> globalParameters) {
-		List<Map<String, String>> formattedParameters = new ArrayList<>();
-		for (Object[] parameters : globalParameters) {
-			Map<String, String> param = new HashMap<>();
-			param.put("branch", parameters[0].toString());
-			param.put("branchcode", parameters[1].toString());
-			formattedParameters.add(param);
-		}
-		return formattedParameters;
+	    String methodName = "getGlobalParameterBranchByUserName()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+
+	    try {
+	        List<Map<String, Object>> globalParameters =
+	                commonMasterService
+	                        .getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(
+	                                orgid, userName);
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                "Global Parameter Branch information retrieved successfully");
+
+	        responseObjectsMap.put("GlopalParameters", globalParameters);
+
+	        responseDTO = createServiceResponse(responseObjectsMap);
+
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Global Parameter Branch information retrieval failed",
+	                errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok().body(responseDTO);
 	}
 
 	// get Access Customers
@@ -711,20 +712,20 @@ public class CommonMasterController extends BaseController {
 	}
 
 	@PutMapping("/globalparam")
-	public ResponseEntity<ResponseDTO> updateGlobalParam(@RequestBody GlobalParameterVO globalParameterVO) {
+	public ResponseEntity<ResponseDTO> updateGlobalParam(@RequestBody GlobalParameterDTO globalParameterDTO) {
 		String methodName = "updateGlobalParam()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 		String errorMsg = null;
 		Map<String, Object> responseObjectsMap = new HashMap<>();
 		ResponseDTO responseDTO = null;
 		try {
-			GlobalParameterVO gloParameterVO = commonMasterService.updateGlobaParameter(globalParameterVO);
+			GlobalParameterResponseDTO gloParameterVO = commonMasterService.updateGlobaParameter(globalParameterDTO);
 			if (gloParameterVO != null) {
 				responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Global Parameter Updated successfully");
 				responseObjectsMap.put("GlobalParameterVO", gloParameterVO);
 				responseDTO = createServiceResponse(responseObjectsMap);
 			} else {
-				errorMsg = "Global Parameter not found for ID: " + globalParameterVO.getId();
+				errorMsg = "Global Parameter not found for ID: " ;
 				responseDTO = createServiceResponseError(responseObjectsMap, "Global Parameter Update failed",
 						errorMsg);
 			}

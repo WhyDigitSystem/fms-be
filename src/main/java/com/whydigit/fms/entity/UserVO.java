@@ -17,18 +17,19 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.whydigit.fms.dto.CreatedUpdatedDate;
 import com.whydigit.fms.dto.Role;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class UserVO {
 
 	@SuppressWarnings("unused")
@@ -81,12 +82,15 @@ public class UserVO {
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
 
 	@OneToMany(mappedBy = "userVO", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<UserLoginRolesVO> roleAccessVO;
 
 	@OneToMany(mappedBy = "userVO", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<UserLoginClientAccessVO> clientAccessVO;
 
 	@OneToMany(mappedBy = "userVO", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<UserLoginBranchAccessibleVO> branchAccessibleVO;
 	
 	private Date accountRemovedDate;
@@ -105,5 +109,6 @@ public class UserVO {
 		return false;
 	}
 
+	
 	
 }

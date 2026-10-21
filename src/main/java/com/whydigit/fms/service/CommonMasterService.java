@@ -9,6 +9,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
 import com.whydigit.fms.dto.CityDTO;
 import com.whydigit.fms.dto.CompanyDTO;
 import com.whydigit.fms.dto.CountryDTO;
@@ -16,6 +17,7 @@ import com.whydigit.fms.dto.CurrencyDTO;
 import com.whydigit.fms.dto.DepartmentDTO;
 import com.whydigit.fms.dto.DesignationDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
+import com.whydigit.fms.dto.GlobalParameterDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
 import com.whydigit.fms.dto.UserProfileInformationDTO;
@@ -99,11 +101,11 @@ public interface CommonMasterService {
 
 	Optional<GlobalParameterVO> getGlobalParamByOrgIdAndUserName(Long orgid, String userId);
 
-	GlobalParameterVO updateGlobaParameter(GlobalParameterVO globalParameterVO);
+	GlobalParameterResponseDTO updateGlobaParameter(GlobalParameterDTO globalParameterDTO);
 
 	// to getAcces Global Param Dteails
 
-	Set<Object[]> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(Long orgid, String userName);
+	List<Map<String, Object>> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(Long orgid, String userName);
 
 	
 	Map<String, Object> createUpdateScreenNames(ScreenNamesDTO screenNamesDTO) throws ApplicationException;
@@ -149,5 +151,6 @@ public interface CommonMasterService {
 			throws ApplicationException;
 
 	UserProfileInformationVO getProfileInformationByUserId(Long id);
+
 
 }
