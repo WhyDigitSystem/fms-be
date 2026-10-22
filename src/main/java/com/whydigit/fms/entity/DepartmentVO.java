@@ -39,7 +39,7 @@ public class DepartmentVO {
 	private String createdBy;
 	@Column(name = "modifiedby",length =25)
 	private String updatedBy;
-	private boolean cancel;
+	private boolean cancel=false;
 	
 	@JsonGetter("active")
 	public String getActive() {

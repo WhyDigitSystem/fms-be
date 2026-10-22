@@ -10,10 +10,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.whydigit</groupId>
-    <artifactId>wms</artifactId>
+    <artifactId>fms</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>wms</name>
-    <description>WMS project for Spring Boot</description>
+    <name>fms</name>
+    <description>FMS project for Spring Boot</description>
     <properties>
         <java.version>8</java.version>
         <poi.version>5.2.3</poi.version>

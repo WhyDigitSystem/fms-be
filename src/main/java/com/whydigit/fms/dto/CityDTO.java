@@ -11,11 +11,11 @@ public class CityDTO {
 	private Long id;
 
 	private String cityCode;
-	private String country;
+	private Long country;
 	private String cityName;
-	private String state;
+	private Long state;
 	private boolean active;
 	private String createdBy;
 	private Long orgId;
-	private boolean cancel;
+//	private boolean cancel;
 }

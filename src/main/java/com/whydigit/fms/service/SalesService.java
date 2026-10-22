@@ -6,10 +6,10 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.whydigit.fms.ResponseDTO.EnquiryResponseDTO;
+import com.whydigit.fms.ResponseDTO.QuotationResponseDTO;
 import com.whydigit.fms.dto.EnquiryDTO;
+import com.whydigit.fms.dto.QuotationDTO;
 import com.whydigit.fms.exception.ApplicationException;
-
-import io.swagger.v3.oas.annotations.servers.Server;
 
 @Service
 public interface SalesService {
@@ -21,5 +21,11 @@ public interface SalesService {
 	String getEnquiryDocId(Long orgId) throws ApplicationException;
 
 	List<EnquiryResponseDTO> getEnquiryByOrgId(Long orgId, String branch) throws ApplicationException;
+
+	Map<String, Object> createUpdateQuotation(QuotationDTO quotationDTO) throws ApplicationException;
+
+	QuotationResponseDTO getQuotationById(Long id) throws ApplicationException;
+
+	List<QuotationResponseDTO> getQuotationByOrgIdAndBranch(Long orgId, Long branch) throws ApplicationException;
 
 }

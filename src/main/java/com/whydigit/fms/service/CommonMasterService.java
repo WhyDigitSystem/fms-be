@@ -9,6 +9,9 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.whydigit.fms.ResponseDTO.CityResponseDTO;
+import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
+import com.whydigit.fms.ResponseDTO.StateResponseDTO;
 import com.whydigit.fms.dto.CityDTO;
 import com.whydigit.fms.dto.CompanyDTO;
 import com.whydigit.fms.dto.CountryDTO;
@@ -16,10 +19,10 @@ import com.whydigit.fms.dto.CurrencyDTO;
 import com.whydigit.fms.dto.DepartmentDTO;
 import com.whydigit.fms.dto.DesignationDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
+import com.whydigit.fms.dto.GlobalParameterDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
 import com.whydigit.fms.dto.UserProfileInformationDTO;
-import com.whydigit.fms.entity.CityVO;
 import com.whydigit.fms.entity.CompanyVO;
 import com.whydigit.fms.entity.CountryVO;
 import com.whydigit.fms.entity.CurrencyVO;
@@ -28,7 +31,6 @@ import com.whydigit.fms.entity.DesignationVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
-import com.whydigit.fms.entity.StateVO;
 import com.whydigit.fms.entity.UserProfileInformationVO;
 import com.whydigit.fms.exception.ApplicationException;
 
@@ -48,11 +50,11 @@ public interface CommonMasterService {
 
 	// State
 
-	List<StateVO> getAllgetAllStates(Long orgid);
+	List<StateResponseDTO> getAllStateByOrgId(Long orgid);
 
-	Optional<StateVO> getStateById(Long stateid);
+	Optional<StateResponseDTO> getStateById(Long stateid);
 
-	List<StateVO> getStatesByCountry(Long orgid, String country);
+	List<StateResponseDTO> getStatesByCountry(Long orgid, Long country);
 
 	Map<String, Object> createUpdateState(StateDTO stateDTO) throws ApplicationException;
 
@@ -60,11 +62,11 @@ public interface CommonMasterService {
 
 	// city
 
-	List<CityVO> getAllgetAllCities(Long orgid);
+	List<CityResponseDTO> getAllCityByOrgId(Long orgid);
+	
+	List<CityResponseDTO> getCityByOrgIdAndstate(Long orgid, Long state);
 
-	List<CityVO> getAllCitiesByState(Long orgid, String state);
-
-	Optional<CityVO> getCityById(Long cityid);
+	Optional<CityResponseDTO> getCityById(Long cityid);
 
 	Map<String, Object> createUpdateCity(CityDTO cityDTO) throws ApplicationException;
 
@@ -99,11 +101,11 @@ public interface CommonMasterService {
 
 	Optional<GlobalParameterVO> getGlobalParamByOrgIdAndUserName(Long orgid, String userId);
 
-	GlobalParameterVO updateGlobaParameter(GlobalParameterVO globalParameterVO);
+	GlobalParameterResponseDTO updateGlobaParameter(GlobalParameterDTO globalParameterDTO);
 
 	// to getAcces Global Param Dteails
 
-	Set<Object[]> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(Long orgid, String userName);
+	List<Map<String, Object>> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(Long orgid, String userName);
 
 	
 	Map<String, Object> createUpdateScreenNames(ScreenNamesDTO screenNamesDTO) throws ApplicationException;
@@ -149,5 +151,12 @@ public interface CommonMasterService {
 			throws ApplicationException;
 
 	UserProfileInformationVO getProfileInformationByUserId(Long id);
+
+
+
+
+
+
+
 
 }

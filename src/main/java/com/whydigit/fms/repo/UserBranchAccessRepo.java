@@ -11,8 +11,15 @@ import com.whydigit.fms.entity.UserVO;
 
 public interface UserBranchAccessRepo extends JpaRepository<UserLoginBranchAccessibleVO, Long> {
 
-	@Query(nativeQuery = true,value = "SELECT a.branch,a.branchcode FROM userbranchaccess a,users b where a.usersid=b.userid and b.orgid=?1 and b.username=?2 group by a.branch,a.branchcode")
-	Set<Object[]> findGlobalParametersBranchByUserName(Long orgid, String userName);
+	@Query(value = "SELECT  c.branchid AS branchId, "
+	        + "c.branch, c.branchcode "
+	        + "FROM userbranchaccess a "
+	        + "JOIN users b ON a.usersid = b.userid "
+	        + "JOIN branch c ON a.branch = c.branchid "
+	        + "WHERE b.orgid = ?1 AND b.username = ?2 "
+	        + "GROUP BY c.branchid, c.branch, c.branchcode",
+	        nativeQuery = true)
+	List<Object[]> findGlobalParametersBranchByUserName(Long orgid, String userName);
 
 	List<UserLoginBranchAccessibleVO> findByUserVO(UserVO userVO);
 
