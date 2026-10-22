@@ -26,11 +26,11 @@ public class DepartmentVO {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "departmentgen")
 	@SequenceGenerator(name = "departmentgen",sequenceName = "departmentseq",initialValue = 1000000001,allocationSize = 1)
-	@Column(name="deptid")
+	@Column(name="departmentid")
 	private Long id;
-	@Column(name = "departmentname",length =25)
-	private String departmentName;
-	@Column(name = "deptcode",length =25)
+	@Column(name = "department",length =25)
+	private String department;
+	@Column(name = "code",length =25)
 	private String code;
 	private boolean active;
 	@Column(name = "orgid")

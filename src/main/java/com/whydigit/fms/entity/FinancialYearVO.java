@@ -50,11 +50,18 @@ public class FinancialYearVO {
 	private String createdBy;
 	@Column(name="modifiedby",length =25)
 	private String updatedBy;
+	@Column(name="active",length =25)
 	private boolean active;
-	
+	@Column(name="cancel",length =25)
+	private boolean cancel= false;
 	@JsonGetter("active")
 	public String getActive() {
 		return active ? "Active" : "In-Active";
+	}
+	
+	@JsonGetter("cancel")
+	public String getCancel() {
+		return cancel ? "T" : "F";
 	}
 	
 	

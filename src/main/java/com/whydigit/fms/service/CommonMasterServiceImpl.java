@@ -1092,7 +1092,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	private void getDesignationVOFromDesignationDTO(DesignationVO designationVO, DesignationDTO designationDTO) {
 		designationVO.setDesignation(designationDTO.getDesignation().toUpperCase());
 		designationVO.setActive(designationDTO.isActive());
-		designationVO.setCancel(designationDTO.isCancel());
+//		designationVO.setCancel(designationDTO.isCancel());
 		designationVO.setOrgId(designationDTO.getOrgId());
 
 	}
@@ -1234,10 +1234,10 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 						departmentDTO.getCode());
 				throw new ApplicationException(errorMessage);
 			}
-			if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+			if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 					departmentDTO.getOrgId())) {
 				String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-						departmentDTO.getDepartmentName());
+						departmentDTO.getDepartment());
 				throw new ApplicationException(errorMessage);
 			}
 
@@ -1258,20 +1258,20 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 				}
 				departmentVO.setCode(departmentDTO.getCode());
 			}
-			if (!departmentVO.getDepartmentName().equalsIgnoreCase(departmentDTO.getDepartmentName())) {
-				if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+			if (!departmentVO.getDepartment().equalsIgnoreCase(departmentDTO.getDepartment())) {
+				if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 						departmentDTO.getOrgId())) {
 					String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-							departmentDTO.getDepartmentName());
+							departmentDTO.getDepartment());
 					throw new ApplicationException(errorMessage);
 				}
-				if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+				if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 						departmentDTO.getOrgId())) {
 					String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-							departmentDTO.getDepartmentName());
+							departmentDTO.getDepartment());
 					throw new ApplicationException(errorMessage);
 				}
-				departmentVO.setDepartmentName(departmentDTO.getDepartmentName());
+				departmentVO.setDepartment(departmentDTO.getDepartment());
 			}
 
 			departmentVO.setUpdatedBy(departmentDTO.getCreatedBy());
@@ -1288,11 +1288,11 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	}
 
 	private void getDepartmentVOFromDepartmentDTO(DepartmentVO departmentVO, DepartmentDTO departmentDTO) {
-		departmentVO.setDepartmentName(departmentDTO.getDepartmentName());
+		departmentVO.setDepartment(departmentDTO.getDepartment());
 		departmentVO.setCode(departmentDTO.getCode());
 		departmentVO.setActive(departmentDTO.isActive());
 		departmentVO.setOrgId(departmentDTO.getOrgId());
-		departmentVO.setCancel(departmentDTO.isCancel());
+//		departmentVO.setCancel(departmentDTO.isCancel());
 	}
 
 	@Override

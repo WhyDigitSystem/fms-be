@@ -33,7 +33,7 @@ public class ServiceVO {
 
 	// Service Information
 	@Column(name = "service_code")
-	private Long serviceCode;
+	private String serviceCode;
 
 	@Column(name = "service_description")
 	private String serviceDescription;

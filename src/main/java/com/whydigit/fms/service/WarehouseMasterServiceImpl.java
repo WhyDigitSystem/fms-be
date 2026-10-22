@@ -15,12 +15,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.whydigit.fms.ResponseDTO.BranchResponseDTO;
+import com.whydigit.fms.ResponseDTO.DepartmentResponseDTO;
+import com.whydigit.fms.ResponseDTO.DesignationResponseDTO;
+import com.whydigit.fms.ResponseDTO.EmployeeResponseDTO;
 import com.whydigit.fms.dto.BranchDTO;
 import com.whydigit.fms.dto.DocumentTypeDTO;
 import com.whydigit.fms.dto.DocumentTypeMappingDTO;
 import com.whydigit.fms.dto.DocumentTypeMappingDetailsDTO;
 import com.whydigit.fms.dto.EmployeeDTO;
 import com.whydigit.fms.entity.BranchVO;
+import com.whydigit.fms.entity.DepartmentVO;
+import com.whydigit.fms.entity.DesignationVO;
 import com.whydigit.fms.entity.DocumentTypeMappingDetailsVO;
 import com.whydigit.fms.entity.DocumentTypeMappingVO;
 import com.whydigit.fms.entity.DocumentTypeVO;
@@ -28,6 +34,8 @@ import com.whydigit.fms.entity.EmployeeVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.exception.ApplicationException;
 import com.whydigit.fms.repo.BranchRepo;
+import com.whydigit.fms.repo.DepartmentRepo;
+import com.whydigit.fms.repo.DesignationRepo;
 import com.whydigit.fms.repo.DocumentTypeDetailsRepo;
 import com.whydigit.fms.repo.DocumentTypeMappingDetailsRepo;
 import com.whydigit.fms.repo.DocumentTypeMappingRepo;
@@ -69,7 +77,11 @@ public class WarehouseMasterServiceImpl implements WarehouseMasterService {
 	NotificationRepo notificationRepo;
 
 	
-
+   @Autowired
+   DesignationRepo designationRepo;
+   
+   @Autowired
+   DepartmentRepo departmentRepo;
 	
 	// Branch
 
@@ -190,69 +202,174 @@ public class WarehouseMasterServiceImpl implements WarehouseMasterService {
 	}
 
 	@Override
-	public Map<String, Object> createEmployee(EmployeeDTO employeeDTO) throws ApplicationException {
-		EmployeeVO employeeVO;
-		String message = null;
+	@Transactional
+	public Map<String, Object> createEmployee(EmployeeDTO employeeDTO)
+	        throws ApplicationException {
 
-		if (ObjectUtils.isEmpty(employeeDTO.getId())) {
-			// Check for existing employee by employee code within the organization
-			if (employeeRepo.existsByEmployeeCodeAndOrgId(employeeDTO.getEmployeeCode(), employeeDTO.getOrgId())) {
-				String errorMessage = String.format("This EmployeeCode: %s Already Exists in This Organization",
-						employeeDTO.getEmployeeCode());
-				throw new ApplicationException(errorMessage);
-			}
-			// Create new employee
-			employeeVO = new EmployeeVO();
-			employeeVO.setCreatedBy(employeeDTO.getCreatedBy());
-			employeeVO.setUpdatedBy(employeeDTO.getCreatedBy());
-			message = "Employee Creation Successfully";
-		} else {
-			// Update existing employee
-			employeeVO = employeeRepo.findById(employeeDTO.getId()).orElseThrow(
-					() -> new ApplicationException("ID is Not Found Any Information: " + employeeDTO.getId()));
+	    EmployeeVO employeeVO;
+	    String message;
 
-			employeeVO.setUpdatedBy(employeeDTO.getCreatedBy());
+	    if (ObjectUtils.isEmpty(employeeDTO.getId())) {
 
-			if (!employeeVO.getEmployeeCode().equalsIgnoreCase(employeeDTO.getEmployeeCode())) {
-				if (employeeRepo.existsByEmployeeCodeAndOrgId(employeeDTO.getEmployeeCode(), employeeDTO.getOrgId())) {
-					String errorMessage = String.format("This EmployeeCode: %s Already Exists in This Organization",
-							employeeDTO.getEmployeeCode());
-					throw new ApplicationException(errorMessage);
-				}
-				employeeVO.setEmployeeCode(employeeDTO.getEmployeeCode());
-			}
-			message = "Employee Update Successfully";
-		}
+	        if (employeeRepo.existsByEmployeeCodeAndOrgId(
+	                employeeDTO.getEmployeeCode(), employeeDTO.getOrgId())) {
 
-		// Map the remaining fields
-		getEmployeeVOFromEmployeeDTO(employeeVO, employeeDTO);
+	            throw new ApplicationException(String.format(
+	                    "This EmployeeCode: %s Already Exists in This Organization",
+	                    employeeDTO.getEmployeeCode()));
+	        }
 
-		// Save the entity
-		employeeRepo.save(employeeVO);
+	        employeeVO = new EmployeeVO();
+	        employeeVO.setCreatedBy(employeeDTO.getCreatedBy());
+	        employeeVO.setUpdatedBy(employeeDTO.getCreatedBy());
 
-		// Prepare the response
-		Map<String, Object> response = new HashMap<>();
-		response.put("message", message);
-		response.put("employeeVO", employeeVO);
+	        message = "Employee Creation Successfully";
 
-		return response;
+	    } else {
+
+	        employeeVO = employeeRepo.findById(employeeDTO.getId())
+	                .orElseThrow(() -> new ApplicationException(
+	                        "ID is Not Found Any Information: "
+	                                + employeeDTO.getId()));
+
+	        if (!employeeVO.getEmployeeCode().equalsIgnoreCase(
+	                employeeDTO.getEmployeeCode())
+	                && employeeRepo.existsByEmployeeCodeAndOrgId(
+	                        employeeDTO.getEmployeeCode(),
+	                        employeeDTO.getOrgId())) {
+
+	            throw new ApplicationException(String.format(
+	                    "This EmployeeCode: %s Already Exists in This Organization",
+	                    employeeDTO.getEmployeeCode()));
+	        }
+
+	        employeeVO.setUpdatedBy(employeeDTO.getCreatedBy());
+
+	        message = "Employee Update Successfully";
+	    }
+
+	    getEmployeeVOFromEmployeeDTO(employeeVO, employeeDTO);
+
+	    EmployeeVO savedEmployee = employeeRepo.save(employeeVO);
+
+	    EmployeeResponseDTO employeeResponseDTO =
+	            getEmployeeResponseDTO(savedEmployee);
+
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("message", message);
+	    response.put("employeeVO", employeeResponseDTO);
+
+	    return response;
 	}
+	
+	private void getEmployeeVOFromEmployeeDTO(
+	        EmployeeVO employeeVO,
+	        EmployeeDTO employeeDTO) throws ApplicationException {
 
-	private void getEmployeeVOFromEmployeeDTO(EmployeeVO employeeVO, EmployeeDTO employeeDTO) {
-		employeeVO.setEmployeeCode(employeeDTO.getEmployeeCode());
-		employeeVO.setEmployeeName(employeeDTO.getEmployeeName());
-		employeeVO.setGender(employeeDTO.getGender());
-		employeeVO.setBranch(employeeDTO.getBranch());
-		employeeVO.setBranchCode(employeeDTO.getBranchCode());
-		employeeVO.setDepartment(employeeDTO.getDepartment());
-		employeeVO.setDesignation(employeeDTO.getDesignation());
-		employeeVO.setDateOfBirth(employeeDTO.getDateOfBirth());
-		employeeVO.setJoiningDate(employeeDTO.getJoiningdate());
-		employeeVO.setOrgId(employeeDTO.getOrgId());
-		employeeVO.setCancel(employeeDTO.isCancel());
-		employeeVO.setActive(employeeDTO.isActive());
-		employeeVO.setCancelRemark(employeeDTO.getCancelRemark());
+	    employeeVO.setEmployeeCode(employeeDTO.getEmployeeCode());
+	    employeeVO.setEmployeeName(employeeDTO.getEmployeeName());
+	    employeeVO.setGender(employeeDTO.getGender());
+
+	    // Branch mapping
+	    if (employeeDTO.getBranch() != null) {
+	        BranchVO branchVO = branchRepo.findById(employeeDTO.getBranch())
+	                .orElseThrow(() -> new ApplicationException(
+	                        "Branch ID not found: " + employeeDTO.getBranch()));
+
+	        employeeVO.setBranch(branchVO);
+	    } else {
+	        employeeVO.setBranch(null);
+	    }
+
+	    // Department mapping
+	    if (employeeDTO.getDepartment() != null) {
+	        DepartmentVO departmentVO =
+	                departmentRepo.findById(employeeDTO.getDepartment())
+	                        .orElseThrow(() -> new ApplicationException(
+	                                "Department ID not found: "
+	                                        + employeeDTO.getDepartment()));
+
+	        employeeVO.setDepartment(departmentVO);
+	    } else {
+	        employeeVO.setDepartment(null);
+	    }
+
+	    // Designation mapping
+	    if (employeeDTO.getDesignation() != null) {
+	        DesignationVO designationVO =
+	                designationRepo.findById(employeeDTO.getDesignation())
+	                        .orElseThrow(() -> new ApplicationException(
+	                                "Designation ID not found: "
+	                                        + employeeDTO.getDesignation()));
+
+	        employeeVO.setDesignation(designationVO);
+	    } else {
+	        employeeVO.setDesignation(null);
+	    }
+
+	    // Remaining fields
+	    employeeVO.setDateOfBirth(employeeDTO.getDateOfBirth());
+	    employeeVO.setJoiningDate(employeeDTO.getJoiningdate());
+	    employeeVO.setOrgId(employeeDTO.getOrgId());
+	    employeeVO.setCancel(employeeDTO.isCancel());
+	    employeeVO.setActive(employeeDTO.isActive());
+	    employeeVO.setCancelRemark(employeeDTO.getCancelRemark());
 	}
+	
+	private EmployeeResponseDTO getEmployeeResponseDTO(EmployeeVO employeeVO) {
+
+	    EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
+
+	    responseDTO.setId(employeeVO.getId());
+	    responseDTO.setEmployeeCode(employeeVO.getEmployeeCode());
+	    responseDTO.setEmployeeName(employeeVO.getEmployeeName());
+	    responseDTO.setGender(employeeVO.getGender());
+
+	    // Branch response
+	    if (employeeVO.getBranch() != null) {
+	        BranchResponseDTO branchDTO = new BranchResponseDTO();
+	        branchDTO.setId(employeeVO.getBranch().getId());
+	        branchDTO.setBranch(employeeVO.getBranch().getBranch());
+	        branchDTO.setBranchCode(employeeVO.getBranch().getBranchCode());
+
+	        responseDTO.setBranch(branchDTO);
+	    }
+
+	    // Department response
+	    if (employeeVO.getDepartment() != null) {
+	        DepartmentResponseDTO departmentDTO = new DepartmentResponseDTO();
+	        departmentDTO.setId(employeeVO.getDepartment().getId());
+	        departmentDTO.setDepartment(
+	                employeeVO.getDepartment().getDepartment());
+	        departmentDTO.setCode(employeeVO.getDepartment().getCode());
+
+	        responseDTO.setDepartment(departmentDTO);
+	    }
+
+	    // Designation response
+	    if (employeeVO.getDesignation() != null) {
+	        DesignationResponseDTO designationDTO = new DesignationResponseDTO();
+	        designationDTO.setId(employeeVO.getDesignation().getId());
+	        designationDTO.setDesignation(
+	                employeeVO.getDesignation().getDesignation());
+	        designationDTO.setCode(employeeVO.getDesignation().getCode());
+
+	        responseDTO.setDesignation(designationDTO);
+	    }
+
+	    responseDTO.setDateOfBirth(employeeVO.getDateOfBirth());
+	    responseDTO.setJoiningdate(employeeVO.getJoiningDate());
+	    responseDTO.setCreatedBy(employeeVO.getCreatedBy());
+	    responseDTO.setUpdatedBy(employeeVO.getUpdatedBy());
+	    responseDTO.setOrgId(employeeVO.getOrgId());
+	    responseDTO.setCancel(employeeVO.getCancel());
+	    responseDTO.setCancelRemark(employeeVO.getCancelRemark());
+	    responseDTO.setActive(employeeVO.getActive());
+
+	    return responseDTO;
+	}
+	
+	
 
 	@Override
 	public void deleteEmployee(Long employeeid) {

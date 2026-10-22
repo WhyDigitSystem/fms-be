@@ -3,9 +3,12 @@ package com.whydigit.fms.entity;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -35,14 +38,18 @@ public class EmployeeVO {
 	private String employeeName;
 	@Column(name = "gender",length =25)
 	private String gender;
-	@Column(name = "branch",length =25)
-	private String branch;
-	@Column(name = "branchcode",length =25)
-	private String branchCode;
-	@Column(name = "department",length =25)
-	private String department;
-	@Column(name = "designation",length =25)
-	private String designation;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "branch")
+	private BranchVO branch;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "department")
+	private DepartmentVO department;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "designation")
+	private DesignationVO designation;
+	
 	@Column(name = "dateofbirth",length =25)
 	private String dateOfBirth;
 	@Column(name = "joiningdate")

@@ -12,7 +12,7 @@ public class ServiceResponseDTO
 
     private Long id;
 
-    private Long serviceCode;
+    private String serviceCode;
 
     private String serviceDescription;
 
