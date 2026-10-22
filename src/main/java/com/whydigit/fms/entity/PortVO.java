@@ -35,6 +35,9 @@ public class PortVO
 
     @Column(name = "cancel_remarks")
     private String cancelRemarks;
+    
+    
+    
 
     @Column(name = "createdby", length = 25)
     private String createdBy;
