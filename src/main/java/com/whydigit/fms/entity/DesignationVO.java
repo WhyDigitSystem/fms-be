@@ -32,7 +32,7 @@ public class DesignationVO {
 	@Column(name="orgid")
     private Long orgId;
 	private boolean active;
-	private boolean cancel;
+	private boolean cancel=false;
 	
 	@Column(name="createdby",length =25)
 	private String createdBy;

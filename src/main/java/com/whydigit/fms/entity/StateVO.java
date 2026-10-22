@@ -3,9 +3,12 @@ package com.whydigit.fms.entity;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -33,8 +36,9 @@ public class StateVO {
 	private String stateCode;
 	@Column(name="state",length =25)
 	private String stateName;
-	@Column(name="country",length =25)
-    private String country;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "country")
+	private CountryVO country;
 	@Column(name="region",length =25)
     private String region;
 	@Column(name="statenumber",length =25)

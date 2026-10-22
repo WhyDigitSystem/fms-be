@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.whydigit.fms.ResponseDTO.CityResponseDTO;
 import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
+import com.whydigit.fms.ResponseDTO.StateResponseDTO;
 import com.whydigit.fms.common.CommonConstant;
 import com.whydigit.fms.common.UserConstants;
 import com.whydigit.fms.dto.CityDTO;
@@ -38,7 +40,6 @@ import com.whydigit.fms.dto.ResponseDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
 import com.whydigit.fms.dto.UserProfileInformationDTO;
-import com.whydigit.fms.entity.CityVO;
 import com.whydigit.fms.entity.CompanyVO;
 import com.whydigit.fms.entity.CountryVO;
 import com.whydigit.fms.entity.CurrencyVO;
@@ -47,7 +48,6 @@ import com.whydigit.fms.entity.DesignationVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
-import com.whydigit.fms.entity.StateVO;
 import com.whydigit.fms.entity.UserProfileInformationVO;
 import com.whydigit.fms.service.CommonMasterService;
 
@@ -135,88 +135,99 @@ public class CommonMasterController extends BaseController {
 
 	// State
 
-	@GetMapping("/state")
-	public ResponseEntity<ResponseDTO> getAllStates(@RequestParam Long orgid) {
-		String methodName = "getAllStates()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		List<StateVO> stateVO = new ArrayList<>();
-		try {
-			stateVO = commonMasterService.getAllgetAllStates(orgid);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
-		if (StringUtils.isBlank(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "State information get successfully");
-			responseObjectsMap.put("stateVO", stateVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap, "States information receive failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+	@GetMapping("/getAllStateByOrgId")
+	public ResponseEntity<ResponseDTO> getAllStateByOrgId(@RequestParam Long orgid) {
+	    String methodName = "getAllStateByOrgId()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+	    List<StateResponseDTO> stateVO = new ArrayList<>();
+
+	    try {
+	        stateVO = commonMasterService.getAllStateByOrgId(orgid);
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+	    }
+
+	    if (StringUtils.isBlank(errorMsg)) {
+	        responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "State information get successfully");
+	        responseObjectsMap.put("stateVO", stateVO);
+	        responseDTO = createServiceResponse(responseObjectsMap);
+	    } else {
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap, "States information receive failed", errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok().body(responseDTO);
 	}
 
-	// getStateByStateId
+	@GetMapping("/getStateById")
+	public ResponseEntity<ResponseDTO> getStateById(@RequestParam Long stateid) {
+	    String methodName = "getStateById()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+	    StateResponseDTO stateVO = null;
 
-	@GetMapping("/state/{stateid}")
-	public ResponseEntity<ResponseDTO> getStateById(@PathVariable Long stateid) {
-		String methodName = "getStateById()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		StateVO stateVO = null;
-		try {
-			stateVO = commonMasterService.getStateById(stateid).orElse(null);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
+	    try {
+	        stateVO = commonMasterService.getStateById(stateid).orElse(null);
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+	    }
 
-		if (StringUtils.isEmpty(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "States found by State ID");
-			responseObjectsMap.put("stateVO", stateVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			errorMsg = "State not found for State ID: " + stateid;
-			responseDTO = createServiceResponseError(responseObjectsMap, "States not found", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+	    if (StringUtils.isBlank(errorMsg) && stateVO != null) {
+	        responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "States found by State ID");
+	        responseObjectsMap.put("stateVO", stateVO);
+	        responseDTO = createServiceResponse(responseObjectsMap);
+	    } else {
+	        errorMsg = "State not found for State ID: " + stateid;
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap, "States not found", errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@GetMapping("/state/country")
-	public ResponseEntity<ResponseDTO> getStateByCountry(@RequestParam Long orgid, @RequestParam String country) {
-		String methodName = "getStateByCountry()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		List<StateVO> stateVO = null;
-		try {
-			stateVO = commonMasterService.getStatesByCountry(orgid, country);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
+	@GetMapping("/getStateByCountry")
+	public ResponseEntity<ResponseDTO> getStateByCountry(
+	        @RequestParam Long orgid,
+	        @RequestParam Long country) {
 
-		if (StringUtils.isEmpty(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "States found by Country");
-			responseObjectsMap.put("stateVO", stateVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			errorMsg = "State not found for country: " + country;
-			responseDTO = createServiceResponseError(responseObjectsMap, "States not found", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+	    String methodName = "getStateByCountry()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+	    List<StateResponseDTO> stateVO = null;
+
+	    try {
+	        stateVO = commonMasterService.getStatesByCountry(orgid, country);
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+	    }
+
+	    if (StringUtils.isBlank(errorMsg)) {
+	        responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "States found by Country");
+	        responseObjectsMap.put("stateVO", stateVO);
+	        responseDTO = createServiceResponse(responseObjectsMap);
+	    } else {
+	        errorMsg = "State not found for country: " + country;
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap, "States not found", errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@PostMapping("/state")
+	@PutMapping("/createUpdateState")
 	public ResponseEntity<ResponseDTO> createUpdateState(@RequestBody StateDTO stateDTO) {
 		String methodName = "createUpdateState()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
@@ -237,87 +248,96 @@ public class CommonMasterController extends BaseController {
 		return ResponseEntity.ok().body(responseDTO);
 	}
 	// city
+	@GetMapping("/getAllCityByOrgId")
+	public ResponseEntity<ResponseDTO> getAllCityByOrgId(@RequestParam Long orgid) {
+	    String methodName = "getAllCityByOrgId()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+	    List<CityResponseDTO> cityVO = new ArrayList<>();
 
-	@GetMapping("/city")
-	public ResponseEntity<ResponseDTO> getAllCities(@RequestParam Long orgid) {
-		String methodName = "getAllCities()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		List<CityVO> cityVO = new ArrayList<>();
-		try {
-			cityVO = commonMasterService.getAllgetAllCities(orgid);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
+	    try {
+	        cityVO = commonMasterService.getAllCityByOrgId(orgid);
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+	    }
 
-		if (StringUtils.isBlank(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "city information get successfully");
-			responseObjectsMap.put("cityVO", cityVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap, "city information receive failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+	    if (StringUtils.isBlank(errorMsg)) {
+	        responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "city information get successfully");
+	        responseObjectsMap.put("cityVO", cityVO);
+	        responseDTO = createServiceResponse(responseObjectsMap);
+	    } else {
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap, "city information receive failed", errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@GetMapping("/city/state")
-	public ResponseEntity<ResponseDTO> getAllCitiesByState(@RequestParam Long orgid, @RequestParam String state) {
-		String methodName = "getAllCitiesByState()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		List<CityVO> cityVO = new ArrayList<>();
-		try {
-			cityVO = commonMasterService.getAllCitiesByState(orgid, state);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
+	@GetMapping("/getCityByOrgIdAndstate")
+	public ResponseEntity<ResponseDTO> getCityByOrgIdAndstate(
+	        @RequestParam Long orgid, @RequestParam Long state) {
+	    String methodName = "getCityByOrgIdAndstate()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+	    List<CityResponseDTO> cityVO = new ArrayList<>();
 
-		if (StringUtils.isBlank(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "city information get successfully");
-			responseObjectsMap.put("cityVO", cityVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap, "city information receive failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+	    try {
+	        cityVO = commonMasterService.getCityByOrgIdAndstate(orgid, state);
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+	    }
+
+	    if (StringUtils.isBlank(errorMsg)) {
+	        responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "city information get successfully");
+	        responseObjectsMap.put("cityVO", cityVO);
+	        responseDTO = createServiceResponse(responseObjectsMap);
+	    } else {
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap, "city information receive failed", errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@GetMapping("/city/{cityid}")
-	public ResponseEntity<ResponseDTO> getCityById(@PathVariable Long cityid) {
-		String methodName = "getCityById()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		CityVO cityVO = null;
-		try {
-			cityVO = commonMasterService.getCityById(cityid).orElse(null);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
+	@GetMapping("/cityById")
+	public ResponseEntity<ResponseDTO> getCityById(@RequestParam Long cityid) {
+	    String methodName = "getCityById()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+	    CityResponseDTO cityVO = null;
 
-		if (StringUtils.isEmpty(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "City found by City ID");
-			responseObjectsMap.put("cityVO", cityVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			errorMsg = "City not found for City ID: " + cityid;
-			responseDTO = createServiceResponseError(responseObjectsMap, "City not found", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+	    try {
+	        cityVO = commonMasterService.getCityById(cityid).orElse(null);
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+	    }
+
+	    if (StringUtils.isBlank(errorMsg) && cityVO != null) {
+	        responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "City found by City ID");
+	        responseObjectsMap.put("cityVO", cityVO);
+	        responseDTO = createServiceResponse(responseObjectsMap);
+	    } else {
+	        errorMsg = "City not found for City ID: " + cityid;
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap, "City not found", errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok().body(responseDTO);
 	}
 
-	@PostMapping("/createUpdateCity")
+	@PutMapping("/createUpdateCity")
 	public ResponseEntity<ResponseDTO> createUpdateCity(@RequestBody CityDTO cityDTO) {
 		String methodName = "createCity()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
