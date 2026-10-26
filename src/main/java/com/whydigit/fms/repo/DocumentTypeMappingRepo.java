@@ -5,60 +5,34 @@ import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.whydigit.fms.entity.DocumentTypeMappingVO;
-
 public interface DocumentTypeMappingRepo extends JpaRepository<DocumentTypeMappingVO, Long> {
 
-//	
-//	@Query(nativeQuery = true,value="SELECT \r\n"
-//			+ "    b.screenname, \r\n"
-//			+ "    b.screencode, \r\n"
-//			+ "    b.client, \r\n"
-//			+ "    b.clientcode, \r\n"
-//			+ "    b.doccode,\r\n"
-//			+ "    ?4 finyear,\r\n"
-//			+ "    ?2 AS branch,\r\n"
-//			+ "    ?3 AS branchcode,\r\n"
-//			+ "    ?5 AS finyearidentifier,\r\n"
-//			+ "    CONCAT(?3, ?5, b.clientcode, b.doccode) AS prefixfield\r\n"
-//			+ "FROM (\r\n"
-//			+ "    SELECT clientcode, client, doccode, screencode, screenname \r\n"
-//			+ "    FROM m_documenttypedetails  \r\n"
-//			+ "    WHERE CONCAT(client, clientcode, screencode, doccode) NOT IN (\r\n"
-//			+ "        SELECT CONCAT(client, clientcode, screencode, doccode) \r\n"
-//			+ "        FROM m_documenttypemappingdetails \r\n"
-//			+ "        WHERE finyear = ?4 and orgid=?1\r\n"
-//			+ "          AND branch = ?2\r\n"
-//			+ "    ) and orgid=?1\r\n"
-//			+ ") b")
-//	Set<Object[]> getPendingDoctypeMapping(Long orgId, String branch, String branchCode, String finYear, String finYearIdentifier);
-//
-//	List<DocumentTypeMappingVO> findByOrgId(Long orgId);
-	
-	@Query(nativeQuery = true,value = "SELECT b.screenname, \r\n"
-			+ "			    b.screencode, \r\n"
-			+ "			    b.doccode,\r\n"
-			+ "			    ?4 finyear,\r\n"
-			+ "			    ?2 AS branch,\r\n"
-			+ "			    ?3 AS branchcode,\r\n"
-			+ "			    ?5 AS finyearidentifier,\r\n"
-			+ "			    CONCAT(?3, ?5,?6,b.doccode) AS prefixfield,\r\n"
-			+ "				?6 as clientcode\r\n"
-			+ "			FROM (\r\n"
-			+ "			    SELECT doccode, screencode, screenname \r\n"
-			+ "			    FROM m_documenttype  \r\n"
-			+ "			    WHERE CONCAT(screencode, doccode) NOT IN (\r\n"
-			+ "			        SELECT CONCAT(screencode, doccode) \r\n"
-			+ "			        FROM m_documenttypemappingdetails \r\n"
-			+ "			        WHERE finyear = ?4 and orgid = ?1\r\n"
-			+ "			          AND branch = ?2 and clientcode=?6\r\n"
-			+ "			    ) and orgid = ?1\r\n"
-			+ "			) b")
+	@Query(value = "SELECT *\r\n"
+			+ "			FROM document_type_mapping\r\n"
+			+ "			WHERE org_id = :orgId\r\n"
+			+ "			  AND branch = :branch\r\n"
+			+ "			  AND cancel = false\r\n"
+			+ "			  AND active = true\r\n"
+			+ "			ORDER BY document_type_mapping_id", nativeQuery = true)
+	List<DocumentTypeMappingVO> findByOrgIdAndBranch(@Param("orgId") Long orgId, @Param("branch") Long branch);
+
+	boolean existsByBranch_IdAndFinancialYear_IdAndOrgId(Object branch, Object financialYear, Object orgId);
+
+	@Query(nativeQuery = true, value = "SELECT     b.screen_name,     b.screen_code, \r\n"
+			+ "			    b.doc_code,    ?4 finyear,    ?2 AS branch,    ?3 AS branch_code,\r\n"
+			+ "			    ?5 AS finyearidentifier,    CONCAT(?3,'/', b.screen_code,'/',?5,'/') AS prefixfield FROM (\r\n"
+			+ "			    SELECT doc_code, screen_code, screen_name     FROM document_type_master  \r\n"
+			+ "			    WHERE CONCAT(screen_code, doc_code) NOT IN (SELECT CONCAT(screen_code, doc_code) \r\n"
+			+ "			        FROM documenttypemapping_details   WHERE fin_year =?4 and org_id = ?1\r\n"
+			+ "			          AND branch = ?2) and org_id =?1) b")
 	Set<Object[]> getPendingDoctypeMapping(Long orgId, String branch, String branchCode, String finYear,
-			String finYearIdentifier,String clientCode);
+			String finYearIdentifier);
 
 	@Query(value = "select a from DocumentTypeMappingVO a where a.orgId=?1")
 	List<DocumentTypeMappingVO> findByOrgId(Long orgId);
 
 }
+

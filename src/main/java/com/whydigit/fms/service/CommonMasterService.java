@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.whydigit.fms.ResponseDTO.CityResponseDTO;
+import com.whydigit.fms.ResponseDTO.DocumentTypeMappingResponseDTO;
 import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
 import com.whydigit.fms.ResponseDTO.StateResponseDTO;
 import com.whydigit.fms.dto.CityDTO;
@@ -18,6 +19,8 @@ import com.whydigit.fms.dto.CountryDTO;
 import com.whydigit.fms.dto.CurrencyDTO;
 import com.whydigit.fms.dto.DepartmentDTO;
 import com.whydigit.fms.dto.DesignationDTO;
+import com.whydigit.fms.dto.DocumentTypeMappingDTO;
+import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
 import com.whydigit.fms.dto.GlobalParameterDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
@@ -28,6 +31,7 @@ import com.whydigit.fms.entity.CountryVO;
 import com.whydigit.fms.entity.CurrencyVO;
 import com.whydigit.fms.entity.DepartmentVO;
 import com.whydigit.fms.entity.DesignationVO;
+import com.whydigit.fms.entity.DocumentTypeMasterVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
@@ -152,6 +156,24 @@ public interface CommonMasterService {
 
 	UserProfileInformationVO getProfileInformationByUserId(Long id);
 
+	Map<String, Object> createUpdateDocumentTypeMaster(DocumentTypeMasterDTO documentTypeMasterDTO) throws ApplicationException;
+
+	List<DocumentTypeMasterVO> getAllDocumentTypeMasterByOrgId(Long orgId);
+
+	DocumentTypeMasterVO getDocumentTypeMasterById(Long id) throws ApplicationException;
+
+	
+	// documenttypemapping
+
+	Map<String, Object> updateCreateDocumentTypeMapping(DocumentTypeMappingDTO documentTypeMappingDTO)
+			throws ApplicationException;
+
+	DocumentTypeMappingResponseDTO getDocumentTypeMappingById(Long id) throws ApplicationException;
+
+	List<DocumentTypeMappingResponseDTO> getDocumentTypeMappingByOrgId(Long orgId, Long branch)  throws ApplicationException;
+
+	List<Map<String, Object>> getPendingDocumentTypeMapping(Long orgId, String branch, String branchCode,
+			String finYear, String finYearIdentifier);
 
 
 

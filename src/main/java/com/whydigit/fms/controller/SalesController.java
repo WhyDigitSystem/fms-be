@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.whydigit.fms.ResponseDTO.BookingResponseDTO;
 import com.whydigit.fms.ResponseDTO.EnquiryResponseDTO;
 import com.whydigit.fms.ResponseDTO.QuotationResponseDTO;
 import com.whydigit.fms.common.CommonConstant;
 import com.whydigit.fms.common.UserConstants;
+import com.whydigit.fms.dto.BookingDTO;
 import com.whydigit.fms.dto.EnquiryDTO;
 import com.whydigit.fms.dto.QuotationDTO;
 import com.whydigit.fms.dto.ResponseDTO;
@@ -90,7 +92,7 @@ public class SalesController extends BaseController {
 	}
 
 	@GetMapping("/getEnquiryByOrgId")
-	public ResponseEntity<ResponseDTO> getEnquiryByOrgId(@RequestParam Long orgId, @RequestParam String branch) {
+	public ResponseEntity<ResponseDTO> getEnquiryByOrgId(@RequestParam Long orgId, @RequestParam Long branch) {
 
 		String methodName = "getEnquiryByOrgId()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
@@ -278,4 +280,201 @@ public class SalesController extends BaseController {
 	        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
 	    }
 	}
+	
+	
+	//booking
+	
+	
+	
+	// =========================================================
+	// CREATE / UPDATE BOOKING
+	// =========================================================
+
+	@PutMapping("/createUpdateBooking")
+	public ResponseEntity<ResponseDTO> createUpdateBooking(
+	        @RequestBody BookingDTO bookingDTO) {
+
+	    String methodName = "createUpdateBooking()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+	    try {
+
+	        Map<String, Object> result =
+	        		salesService.createUpdateBooking(bookingDTO);
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                result.get("message"));
+
+	        responseObjectsMap.put(
+	                "bookingVO",
+	                result.get("bookingVO"));
+
+	        ResponseDTO responseDTO =
+	                createServiceResponse(responseObjectsMap);
+
+	        return ResponseEntity.ok(responseDTO);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error(
+	                UserConstants.ERROR_MSG_METHOD_NAME,
+	                methodName,
+	                e.getMessage());
+
+	        ResponseDTO responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Booking creation/update failed",
+	                e.getMessage());
+
+	        return ResponseEntity.badRequest().body(responseDTO);
+
+	    } finally {
+
+	        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    }
+	}
+
+	// =========================================================
+	// GET BOOKING BY ID
+	// =========================================================
+
+	@GetMapping("/getBookingById")
+	public ResponseEntity<ResponseDTO> getBookingById(
+	        @RequestParam Long id) {
+
+	    String methodName = "getBookingById()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+	    try {
+
+	        BookingResponseDTO bookingDTO =
+	        		salesService.getBookingById(id);
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                "Booking information retrieved successfully");
+
+	        responseObjectsMap.put("bookingVO", bookingDTO);
+
+	        ResponseDTO responseDTO =
+	                createServiceResponse(responseObjectsMap);
+
+	        return ResponseEntity.ok(responseDTO);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error(
+	                UserConstants.ERROR_MSG_METHOD_NAME,
+	                methodName,
+	                e.getMessage());
+
+	        ResponseDTO responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Booking information retrieval failed",
+	                e.getMessage());
+
+	        return ResponseEntity.badRequest().body(responseDTO);
+
+	    } finally {
+
+	        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    }
+	}
+	
+	@GetMapping("/getBookingByOrgId")
+	public ResponseEntity<ResponseDTO> getBookingByOrgId(
+	        @RequestParam Long orgId,
+	        @RequestParam Long branch) {
+
+	    String methodName = "getBookingByOrgId()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+	        List<BookingResponseDTO> bookingResponseDTO =
+	        		salesService.getBookingByOrgId(orgId, branch);
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                "Booking information retrieved successfully");
+
+	        responseObjectsMap.put("bookingResponseVO", bookingResponseDTO);
+
+	        responseDTO = createServiceResponse(responseObjectsMap);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error(
+	                UserConstants.ERROR_MSG_METHOD_NAME,
+	                methodName,
+	                e.getMessage());
+
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Booking information retrieval failed",
+	                e.getMessage());
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok(responseDTO);
+	}
+
+
+	@GetMapping("/getBookingDocId")
+	public ResponseEntity<ResponseDTO> getBookingDocId(
+	        @RequestParam Long orgId) {
+
+	    String methodName = "getBookingDocId()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    String errorMsg = null;
+	    String bookingDocId = null;
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO;
+
+	    try {
+	        bookingDocId = salesService.getBookingDocId(orgId);
+
+	    } catch (Exception e) {
+
+	        errorMsg = e.getMessage();
+
+	        LOGGER.error(
+	                UserConstants.ERROR_MSG_METHOD_NAME,
+	                methodName,
+	                errorMsg);
+	    }
+
+	    if (org.apache.commons.lang3.StringUtils.isNotBlank(errorMsg)) {
+
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Failed to retrieve Booking DocId",
+	                errorMsg);
+
+	    } else {
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                "Booking DocId information retrieved successfully");
+
+	        responseObjectsMap.put("bookingDocId", bookingDocId);
+
+	        responseDTO = createServiceResponse(responseObjectsMap);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    return ResponseEntity.ok(responseDTO);
+	}
+	
+	
+	 
 }

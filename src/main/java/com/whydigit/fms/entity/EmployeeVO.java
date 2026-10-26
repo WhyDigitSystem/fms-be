@@ -13,6 +13,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.whydigit.fms.dto.CreatedUpdatedDate;
 
 import lombok.AllArgsConstructor;
@@ -38,14 +39,17 @@ public class EmployeeVO {
 	private String employeeName;
 	@Column(name = "gender",length =25)
 	private String gender;
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "branch")
 	private BranchVO branch;
 
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department")
 	private DepartmentVO department;
 
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "designation")
 	private DesignationVO designation;

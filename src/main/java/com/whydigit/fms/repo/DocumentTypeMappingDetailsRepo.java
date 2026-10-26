@@ -1,23 +1,37 @@
 package com.whydigit.fms.repo;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import com.whydigit.fms.entity.DocumentTypeMappingDetailsVO;
+import com.whydigit.fms.entity.DocumentTypeMappingVO;
 
+@Repository
 public interface DocumentTypeMappingDetailsRepo extends JpaRepository<DocumentTypeMappingDetailsVO, Long> {
 
-	@Query(nativeQuery = true, value = "select * from m_documenttypemappingdetails where orgid=?1 and finyear=?2 and branchcode=?3 and client =?4 and screencode=?5")
-	DocumentTypeMappingDetailsVO findByOrgIdAndFinYearAndBranchCodeAndClientAndScreenCode(Long orgId, String finYear,
-	String branchCode, String client, String screenCode);	
-
-	@Query(nativeQuery = true ,value = "select  concat(a.prefixfield ,LPAD(a.lastno, 6, '0')) from m_documenttypemappingdetails a where a.branch=?1 and a.client=?2 and a.finyear=?3 and a.screencode=?4")
-	String getGRNDocId(String branch, String client, String finYear, String screenCode);
-
-	@Query(value = "select a from DocumentTypeMappingDetailsVO a where a.orgId=?1 and a.finYear=?2 and a.branchCode=?3 and a.client=?4 and a.screenCode=?5")
-	DocumentTypeMappingDetailsVO findByBranchAndClientAndFinYearAndScreenCode(Long orgId, String finYear,String branchCode, String client, String screenCode);
+	List<DocumentTypeMappingDetailsVO> findByDocumentTypeMappingMasterVOId(Long id);
 
 	@Query(nativeQuery = true, value = "select * from documenttypemapping_details where org_id=?1 and screen_code=?2")
+	DocumentTypeMappingDetailsVO findByOrgIdScreenCode(Long orgId, String screenCode);
+
+	List<DocumentTypeMappingDetailsVO> findByDocumentTypeMappingMasterVO(DocumentTypeMappingVO masterVO);
+
+	@Query(nativeQuery = true, value = "select * from documenttypemapping_details where org_id=?1 and fin_year=?2 and screen_code=?3")
+	DocumentTypeMappingDetailsVO findByOrgIdAndFinYearAndScreenCode(Long orgId, String financialYear,
+			String screenCode);
+	
+	 // New method - ONLY FOR ZERO KM
+    @Query(nativeQuery = true, value =
+            "select * from documenttypemapping_details " +
+            "where org_id=?1 and finyearidentifier=?2 and screen_code=?3")
+    DocumentTypeMappingDetailsVO findByOrgIdAndFinYearIdentifierAndScreenCode(
+            Long orgId,
+            String financialYear,
+            String screenCode);
+
 	DocumentTypeMappingDetailsVO findByOrgIdAndScreenCode(Long orgId, String screenCode);
 
 }
