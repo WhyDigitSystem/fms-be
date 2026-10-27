@@ -9,16 +9,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.whydigit.fms.ResponseDTO.ConfigResponseDTO;
+import com.whydigit.fms.ResponseDTO.PortResponseDTO;
 import com.whydigit.fms.ResponseDTO.ProductResponseDTO;
 import com.whydigit.fms.ResponseDTO.ServiceResponseDTO;
 import com.whydigit.fms.common.CommonConstant;
 import com.whydigit.fms.common.UserConstants;
+import com.whydigit.fms.dto.ConfigDTO;
+import com.whydigit.fms.dto.PortDTO;
 import com.whydigit.fms.dto.ProductDTO;
 import com.whydigit.fms.dto.ResponseDTO;
 import com.whydigit.fms.dto.ServiceDTO;
@@ -240,4 +245,224 @@ public class BasicMasterController extends BaseController {
 
 		return ResponseEntity.ok(responseDTO);
 	}
+
+	// CREATE / UPDATE PORT
+
+	@PutMapping("/createUpdatePort")
+	public ResponseEntity<ResponseDTO> createUpdatePort(@RequestBody PortDTO portDTO) {
+
+		String methodName = "createUpdatePort()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			Map<String, Object> portResult = basicMasterService.createUpdatePort(portDTO);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, portResult.get("message"));
+
+			responseObjectsMap.put("portVO", portResult.get("portVO"));
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage());
+
+			responseDTO = createServiceResponseError(responseObjectsMap, e.getMessage(), e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
+	}
+
+	// GET PORT BY ID
+
+	@GetMapping("/getPortById")
+	public ResponseEntity<ResponseDTO> getPortById(@RequestParam Long id) {
+
+		String methodName = "getPortById()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			PortResponseDTO portResponseDTO = basicMasterService.getPortById(id);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Port information retrieved successfully");
+
+			responseObjectsMap.put("portResponseVO", portResponseDTO);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage());
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Port information retrieval failed",
+					e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
+	}
+
+	// =========================================================
+	// GET PORT BY ORG ID AND BRANCH
+	// =========================================================
+
+	@GetMapping("/getPortByOrgIdAndBranch")
+	public ResponseEntity<ResponseDTO> getPortByOrgIdAndBranch(@RequestParam Long orgId, @RequestParam Long branch) {
+
+		String methodName = "getPortByOrgIdAndBranch()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			List<PortResponseDTO> portResponseDTO = basicMasterService.getPortsByOrgIdAndBranch(orgId, branch);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Port information retrieved successfully");
+
+			responseObjectsMap.put("portResponseVO", portResponseDTO);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage());
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Port information retrieval failed",
+					e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
+	}
+
+	// =========================================================
+	// CONFIGURATION
+	// =========================================================
+
+	// CREATE / UPDATE CONFIGURATION
+	@PutMapping("/createUpdateConfig")
+
+	public ResponseEntity<ResponseDTO> createUpdateConfig(@RequestBody ConfigDTO configDTO) {
+
+		String methodName = "createUpdateConfig()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			Map<String, Object> configResult = basicMasterService.createUpdateConfig(configDTO);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, configResult.get("message"));
+
+			responseObjectsMap.put("configResponseVO", configResult.get("configResponseVO"));
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage(), e);
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Configuration processing failed",
+					e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
+	}
+
+	// GET CONFIGURATION BY ID
+	@GetMapping("/configById")
+	public ResponseEntity<ResponseDTO> getConfigById(@RequestParam Long id) {
+
+		String methodName = "getConfigById()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			ConfigResponseDTO configResponse = basicMasterService.getConfigById(id);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Configuration retrieved successfully");
+
+			responseObjectsMap.put("configResponseVO", configResponse);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage(), e);
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Configuration retrieval failed",
+					e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
+	}
+
+	// GET CONFIGURATIONS BY ORGANIZATION ID AND BRANCH
+	@GetMapping("/configbyOrgIdandBranch")
+	public ResponseEntity<ResponseDTO> getConfigByOrgIdAndBranch(@RequestParam Long orgId, @RequestParam Long branch) {
+
+		String methodName = "getConfigByOrgIdAndBranch()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		ResponseDTO responseDTO;
+
+		try {
+
+			List<ConfigResponseDTO> configResponses = basicMasterService.getConfigByOrgIdAndBranch(orgId, branch);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Configurations retrieved successfully");
+
+			responseObjectsMap.put("configResponseVO", configResponses);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage(), e);
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Configuration retrieval failed",
+					e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
+	}
+
 }
