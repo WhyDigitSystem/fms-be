@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ServiceDTO {
 	private Long id;
 
-    private Long serviceCode;
+    private String serviceCode;
 
     private String serviceDescription;
 

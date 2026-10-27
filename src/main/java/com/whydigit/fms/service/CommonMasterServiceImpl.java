@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.whydigit.fms.ResponseDTO.BranchResponseDTO;
 import com.whydigit.fms.ResponseDTO.CityResponseDTO;
 import com.whydigit.fms.ResponseDTO.CountryResponseDTO;
+import com.whydigit.fms.ResponseDTO.DocumentTypeMappingBranchResponseDTO;
+import com.whydigit.fms.ResponseDTO.DocumentTypeMappingDetailsResponseDTO;
+import com.whydigit.fms.ResponseDTO.DocumentTypeMappingResponseDTO;
 import com.whydigit.fms.ResponseDTO.FinancialYearResponseDTO;
 import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
 import com.whydigit.fms.ResponseDTO.StateDetailResponseDTO;
@@ -32,18 +36,25 @@ import com.whydigit.fms.dto.CountryDTO;
 import com.whydigit.fms.dto.CurrencyDTO;
 import com.whydigit.fms.dto.DepartmentDTO;
 import com.whydigit.fms.dto.DesignationDTO;
+import com.whydigit.fms.dto.DocumentTypeMappingDTO;
+import com.whydigit.fms.dto.DocumentTypeMappingDetailsDTO;
+import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
 import com.whydigit.fms.dto.GlobalParameterDTO;
 import com.whydigit.fms.dto.Role;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
 import com.whydigit.fms.dto.UserProfileInformationDTO;
+import com.whydigit.fms.entity.BranchVO;
 import com.whydigit.fms.entity.CityVO;
 import com.whydigit.fms.entity.CompanyVO;
 import com.whydigit.fms.entity.CountryVO;
 import com.whydigit.fms.entity.CurrencyVO;
 import com.whydigit.fms.entity.DepartmentVO;
 import com.whydigit.fms.entity.DesignationVO;
+import com.whydigit.fms.entity.DocumentTypeMappingDetailsVO;
+import com.whydigit.fms.entity.DocumentTypeMappingVO;
+import com.whydigit.fms.entity.DocumentTypeMasterVO;
 import com.whydigit.fms.entity.EmployeeVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
@@ -59,6 +70,9 @@ import com.whydigit.fms.repo.CountryRepository;
 import com.whydigit.fms.repo.CurrencyRepo;
 import com.whydigit.fms.repo.DepartmentRepo;
 import com.whydigit.fms.repo.DesignationRepo;
+import com.whydigit.fms.repo.DocumentTypeMappingDetailsRepo;
+import com.whydigit.fms.repo.DocumentTypeMappingRepo;
+import com.whydigit.fms.repo.DocumentTypeMasterRepo;
 import com.whydigit.fms.repo.EmployeeRepo;
 import com.whydigit.fms.repo.FinancialYearRepo;
 import com.whydigit.fms.repo.GlobalParameterRepo;
@@ -125,6 +139,15 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Autowired
 	UserProfileInformationRepo userProfileInformationRepo;
 
+	@Autowired
+	DocumentTypeMasterRepo documentTypeMasterRepo;
+	
+	@Autowired
+	DocumentTypeMappingRepo documentTypeMappingRepo;
+	
+	@Autowired
+	DocumentTypeMappingDetailsRepo documentTypeMappingDetailsRepo;
+	
 	// Country
 
 	@Override
@@ -748,7 +771,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Override
 	public List<CurrencyVO> getAllCurrency(Long orgid) {
 
-		return currencyRepo.findAll(orgid);
+		return currencyRepo.findCurrencyByOrgId(orgid);
 	}
 
 	@Override
@@ -1092,7 +1115,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	private void getDesignationVOFromDesignationDTO(DesignationVO designationVO, DesignationDTO designationDTO) {
 		designationVO.setDesignation(designationDTO.getDesignation().toUpperCase());
 		designationVO.setActive(designationDTO.isActive());
-		designationVO.setCancel(designationDTO.isCancel());
+//		designationVO.setCancel(designationDTO.isCancel());
 		designationVO.setOrgId(designationDTO.getOrgId());
 
 	}
@@ -1124,14 +1147,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 						financialYearDTO.getFinYear());
 				throw new ApplicationException(errorMessage);
 			}
-
-			if (financialYearRepo.existsByFinYearIdentifierAndOrgId(financialYearDTO.getFinYearIdentifier(),
-					financialYearDTO.getOrgId())) {
-				String errorMessage = String.format("ThiS finyearidentifier:%s Already Exists This Organization .",
-						financialYearDTO.getFinYearIdentifier());
-				throw new ApplicationException(errorMessage);
-			}
-
+			
 			if (financialYearRepo.existsByFinYearIdAndOrgId(financialYearDTO.getFinYearId(),
 					financialYearDTO.getOrgId())) {
 				String errorMessage = String.format("ThiS finyearid:%s Already Exists This Organization .",
@@ -1157,17 +1173,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 					throw new ApplicationException(errorMessage);
 				}
 				financialYearVO.setFinYear(financialYearDTO.getFinYear());
-			}
-
-			if (!financialYearVO.getFinYearIdentifier().equals(financialYearDTO.getFinYearIdentifier())) {
-				if (financialYearRepo.existsByFinYearIdentifierAndOrgId(financialYearDTO.getFinYearIdentifier(),
-						financialYearDTO.getOrgId())) {
-					String errorMessage = String.format(
-							"This finyearIdentifier: %s already exists for this organization.",
-							financialYearDTO.getFinYearIdentifier());
-					throw new ApplicationException(errorMessage);
-				}
-				financialYearVO.setFinYearIdentifier(financialYearDTO.getFinYearIdentifier());
 			}
 
 			if (financialYearVO.getFinYearId() != financialYearDTO.getFinYearId()) {
@@ -1197,11 +1202,11 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 			FinancialYearDTO financialYearDTO) {
 		financialYearVO.setFinYear(financialYearDTO.getFinYear());
 		financialYearVO.setFinYearId(financialYearDTO.getFinYearId());
-		financialYearVO.setFinYearIdentifier(financialYearDTO.getFinYearIdentifier());
+//		financialYearVO.setFinYearIdentifier(financialYearDTO.getFinYearIdentifier());
 		financialYearVO.setStartDate(financialYearDTO.getStartDate());
 		financialYearVO.setEndDate(financialYearDTO.getEndDate());
-		financialYearVO.setCurrentFinYear(financialYearDTO.isCurrentFinYear());
-		financialYearVO.setClosed(financialYearDTO.isClosed());
+//		financialYearVO.setCurrentFinYear(financialYearDTO.isCurrentFinYear());
+//		financialYearVO.setClosed(financialYearDTO.isClosed());
 		financialYearVO.setOrgId(financialYearDTO.getOrgId());
 		financialYearVO.setActive(financialYearDTO.isActive());
 	}
@@ -1234,10 +1239,10 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 						departmentDTO.getCode());
 				throw new ApplicationException(errorMessage);
 			}
-			if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+			if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 					departmentDTO.getOrgId())) {
 				String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-						departmentDTO.getDepartmentName());
+						departmentDTO.getDepartment());
 				throw new ApplicationException(errorMessage);
 			}
 
@@ -1258,20 +1263,20 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 				}
 				departmentVO.setCode(departmentDTO.getCode());
 			}
-			if (!departmentVO.getDepartmentName().equalsIgnoreCase(departmentDTO.getDepartmentName())) {
-				if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+			if (!departmentVO.getDepartment().equalsIgnoreCase(departmentDTO.getDepartment())) {
+				if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 						departmentDTO.getOrgId())) {
 					String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-							departmentDTO.getDepartmentName());
+							departmentDTO.getDepartment());
 					throw new ApplicationException(errorMessage);
 				}
-				if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+				if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 						departmentDTO.getOrgId())) {
 					String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-							departmentDTO.getDepartmentName());
+							departmentDTO.getDepartment());
 					throw new ApplicationException(errorMessage);
 				}
-				departmentVO.setDepartmentName(departmentDTO.getDepartmentName());
+				departmentVO.setDepartment(departmentDTO.getDepartment());
 			}
 
 			departmentVO.setUpdatedBy(departmentDTO.getCreatedBy());
@@ -1288,11 +1293,11 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	}
 
 	private void getDepartmentVOFromDepartmentDTO(DepartmentVO departmentVO, DepartmentDTO departmentDTO) {
-		departmentVO.setDepartmentName(departmentDTO.getDepartmentName());
+		departmentVO.setDepartment(departmentDTO.getDepartment());
 		departmentVO.setCode(departmentDTO.getCode());
 		departmentVO.setActive(departmentDTO.isActive());
 		departmentVO.setOrgId(departmentDTO.getOrgId());
-		departmentVO.setCancel(departmentDTO.isCancel());
+//		departmentVO.setCancel(departmentDTO.isCancel());
 	}
 
 	@Override
@@ -1368,5 +1373,323 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	public UserProfileInformationVO getProfileInformationByUserId(Long id) {
 		return userProfileInformationRepo.getProfileInformationByUserId(id);
 	}
+	
+	
+	// Document Type
+		@Override
+		public Map<String, Object> createUpdateDocumentTypeMaster(DocumentTypeMasterDTO documentTypeMasterDTO)
+				throws ApplicationException {
+			DocumentTypeMasterVO documentTypeMasterVO = new DocumentTypeMasterVO();
+			String message;
+
+			if (ObjectUtils.isEmpty(documentTypeMasterDTO.getId())) {
+
+				if (documentTypeMasterRepo.existsByOrgIdAndScreenCode(documentTypeMasterDTO.getOrgId(),
+						documentTypeMasterDTO.getScreenCode())) {
+					throw new ApplicationException("ScreenCode already exist ");
+				}
+
+				if (documentTypeMasterRepo.existsByOrgIdAndDocCode(documentTypeMasterDTO.getOrgId(),
+						documentTypeMasterDTO.getDocCode())) {
+					throw new ApplicationException("Doc Code already exist ");
+				}
+
+				documentTypeMasterVO.setDocCode(documentTypeMasterDTO.getDocCode());
+				documentTypeMasterVO.setScreenCode(documentTypeMasterDTO.getScreenCode());
+				documentTypeMasterVO.setCreatedBy(documentTypeMasterDTO.getCreatedBy());
+				documentTypeMasterVO.setUpdatedBy(documentTypeMasterDTO.getCreatedBy());
+				mapDocumentTypeMasterDTOToVO(documentTypeMasterDTO, documentTypeMasterVO);
+				message = "Document Type Master Created successfully";
+
+			} else {
+				documentTypeMasterVO = documentTypeMasterRepo.findById(documentTypeMasterDTO.getId())
+						.orElseThrow(() -> new ApplicationException(
+								"Document Type Master not found for Id: " + documentTypeMasterDTO.getId()));
+
+				if (!documentTypeMasterVO.getScreenCode().equalsIgnoreCase(documentTypeMasterDTO.getScreenCode())) {
+					if (documentTypeMasterRepo.existsByOrgIdAndScreenCode(documentTypeMasterDTO.getOrgId(),
+							documentTypeMasterDTO.getScreenCode())) {
+						throw new ApplicationException("ScreenCode already exist ");
+					}
+					documentTypeMasterVO.setScreenCode(documentTypeMasterDTO.getScreenCode());
+				}
+
+				// Check DocCode uniqueness if changed
+				if (!documentTypeMasterVO.getDocCode().equalsIgnoreCase(documentTypeMasterDTO.getDocCode())) {
+					if (documentTypeMasterRepo.existsByOrgIdAndDocCode(documentTypeMasterDTO.getOrgId(),
+							documentTypeMasterDTO.getDocCode())) {
+						throw new ApplicationException("Doc Code already exist ");
+					}
+					documentTypeMasterVO.setDocCode(documentTypeMasterDTO.getDocCode());
+				}
+
+				documentTypeMasterVO.setUpdatedBy(documentTypeMasterDTO.getCreatedBy());
+				// Update the remaining fields from DTO to VO
+				mapDocumentTypeMasterDTOToVO(documentTypeMasterDTO, documentTypeMasterVO);
+				message = "Document Type Master Updated successfully";
+			}
+
+			documentTypeMasterRepo.save(documentTypeMasterVO);
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("documentTypeMasterVO", documentTypeMasterVO);
+			response.put("message", message);
+			return response;
+		}
+
+		private void mapDocumentTypeMasterDTOToVO(DocumentTypeMasterDTO documentTypeMasterDTO,
+				DocumentTypeMasterVO documentTypeMasterVO) {
+			documentTypeMasterVO.setDescription(documentTypeMasterDTO.getDescription());
+			documentTypeMasterVO.setOrgId(documentTypeMasterDTO.getOrgId());
+			documentTypeMasterVO.setScreenName(documentTypeMasterDTO.getScreenName());
+
+			// Add any additional fields mapping here
+		}
+
+		@Override
+		public DocumentTypeMasterVO getDocumentTypeMasterById(Long id) throws ApplicationException {
+			if (ObjectUtils.isEmpty(id)) {
+				throw new ApplicationException("Invalid DocumentTypeMaster Id");
+			}
+			DocumentTypeMasterVO documentTypeMasterVO = documentTypeMasterRepo.findById(id)
+					.orElseThrow(() -> new ApplicationException("Document Type Master not found for Id: " + id));
+
+			return documentTypeMasterVO;
+		}
+
+		@Override
+		public List<DocumentTypeMasterVO> getAllDocumentTypeMasterByOrgId(Long orgId) {
+			return documentTypeMasterRepo.findAllByOrgId(orgId);
+		}
+		
+		
+
+		@Override
+		@Transactional
+		public Map<String, Object> updateCreateDocumentTypeMapping(DocumentTypeMappingDTO dto) throws ApplicationException {
+
+			Map<String, Object> response = new HashMap<>();
+			String message;
+
+			DocumentTypeMappingVO masterVO;
+
+			if (ObjectUtils.isEmpty(dto.getId())) {
+
+//				if (documentTypeMappingRepo.existsByBranch_IdAndFinancialYear_IdAndOrgId(dto.getBranch(),
+//						dto.getFinancialYear(), dto.getOrgId())) {
+	//
+//					throw new ApplicationException("Document Type Mapping already exists.");
+//				}
+
+				masterVO = new DocumentTypeMappingVO();
+				masterVO.setCreatedBy(dto.getCreatedBy());
+				masterVO.setUpdatedBy(dto.getCreatedBy());
+
+				message = "Document Type Mapping Created Successfully";
+
+			} else {
+
+				masterVO = documentTypeMappingRepo.findById(dto.getId())
+						.orElseThrow(() -> new ApplicationException("Document Type Mapping not found"));
+
+				List<DocumentTypeMappingDetailsVO> oldDetails = documentTypeMappingDetailsRepo
+						.findByDocumentTypeMappingMasterVO(masterVO);
+
+				documentTypeMappingDetailsRepo.deleteAll(oldDetails);
+
+				masterVO.setUpdatedBy(dto.getCreatedBy());
+
+				message = "Document Type Mapping Updated Successfully";
+			}
+
+			createUpdateDocumentTypeMappingVO(dto, masterVO);
+
+			documentTypeMappingRepo.save(masterVO);
+
+			DocumentTypeMappingResponseDTO responseDTO = convertToResponse(masterVO);
+
+			response.put("documentTypeMapping", responseDTO);
+			response.put("message", message);
+
+			return response;
+		}
+
+		private void createUpdateDocumentTypeMappingVO(DocumentTypeMappingDTO dto, DocumentTypeMappingVO masterVO)
+				throws ApplicationException {
+
+			BranchVO branchVO = branchRepo.findById(dto.getBranch())
+					.orElseThrow(() -> new ApplicationException("Branch not found with id : " + dto.getBranch()));
+
+			FinancialYearVO financialYearVO = financialYearRepo.findById(dto.getFinancialYear()).orElseThrow(
+					() -> new ApplicationException("Financial Year not found with id : " + dto.getFinancialYear()));
+
+			masterVO.setBranch(branchVO);
+			masterVO.setFinancialYear(financialYearVO);
+			masterVO.setOrgId(dto.getOrgId());
+			masterVO.setActive(dto.isActive());
+			masterVO.setCancelRemarks(dto.getCancelRemarks());
+			masterVO.setDescription(dto.getDescription());
+			masterVO.setBranchCode(dto.getBranchCode());
+			masterVO.setFinYearIdentifier(dto.getFinYearIdentifier());
+
+			List<DocumentTypeMappingDetailsVO> detailList = new ArrayList<>();
+
+			if (CollectionUtils.isNotEmpty(dto.getDetails())) {
+
+				for (DocumentTypeMappingDetailsDTO child : dto.getDetails()) {
+
+					DocumentTypeMappingDetailsVO detailVO = new DocumentTypeMappingDetailsVO();
+
+					detailVO.setScreenName(child.getScreenName());
+					detailVO.setScreenCode(child.getScreenCode());
+					detailVO.setDocCode(child.getDocCode());
+					detailVO.setPrefix(child.getPrefix());
+
+					detailVO.setBranch(child.getBranch());
+					detailVO.setBranchCode(child.getBranchCode());
+					detailVO.setFinYear(child.getFinYear());
+					detailVO.setFinYearIdentifier(child.getFinYearIdentifier());
+					detailVO.setConcatenation(child.getScreenCode() + child.getDocCode());
+					detailVO.setOrgId(dto.getOrgId());
+
+					detailVO.setDocumentTypeMappingMasterVO(masterVO);
+
+					detailList.add(detailVO);
+				}
+			}
+
+			masterVO.setDetails(detailList);
+		}
+
+		private DocumentTypeMappingResponseDTO convertToResponse(DocumentTypeMappingVO vo) {
+
+			DocumentTypeMappingResponseDTO dto = new DocumentTypeMappingResponseDTO();
+
+			dto.setId(vo.getId());
+			dto.setOrgId(vo.getOrgId());
+			dto.setCreatedBy(vo.getCreatedBy());
+			dto.setUpdatedBy(vo.getUpdatedBy());
+			dto.setCancelRemarks(vo.getCancelRemarks());
+			dto.setActive(vo.getActive());
+			dto.setDescription(vo.getDescription());
+
+			// Branch
+			if (vo.getBranch() != null) {
+
+				dto.setBranch(new DocumentTypeMappingBranchResponseDTO(vo.getBranch().getId(),
+						vo.getBranch().getBranchCode(), vo.getBranch().getBranch()));
+			}
+
+			// Financial Year
+			if (vo.getFinancialYear() != null) {
+
+				dto.setFinancialYear(
+						new FinancialYearResponseDTO(vo.getFinancialYear().getId(), vo.getFinancialYear().getFinYear(),
+								vo.getFinancialYear().getStartDate(), vo.getFinancialYear().getEndDate()));
+			}
+
+			// Child Details
+			List<DocumentTypeMappingDetailsResponseDTO> detailList = new ArrayList<>();
+
+			if (vo.getDetails() != null) {
+
+				for (DocumentTypeMappingDetailsVO detailVO : vo.getDetails()) {
+
+					DocumentTypeMappingDetailsResponseDTO detailDTO = new DocumentTypeMappingDetailsResponseDTO();
+
+					detailDTO.setId(detailVO.getId());
+					detailDTO.setScreenName(detailVO.getScreenName());
+					detailDTO.setScreenCode(detailVO.getScreenCode());
+					detailDTO.setDocCode(detailVO.getDocCode());
+					detailDTO.setPrefix(detailVO.getPrefix());
+					detailDTO.setLastNo(detailVO.getLastNo());
+
+					detailDTO.setBranch(detailVO.getBranch());
+					detailDTO.setBranchCode(detailVO.getBranchCode());
+					detailDTO.setFinYear(detailVO.getFinYear());
+					detailDTO.setFinYearIdentifier(detailVO.getFinYearIdentifier());
+					detailDTO.setConcatenation(detailVO.getConcatenation());
+					detailDTO.setOrgId(dto.getOrgId());
+
+					detailList.add(detailDTO);
+				}
+			}
+
+			dto.setDocumentTypeMappingDetails(detailList);
+
+			return dto;
+		}
+
+//		@Override
+//		public DocumentTypeMappingVO getDocumentTypeMappingById(Long id) throws ApplicationException {
+	//
+//			return documentTypeMappingRepo.findById(id)
+//					.orElseThrow(() -> new ApplicationException("Document Type Mapping not found with id : " + id));
+//		}
+	//
+//		@Override
+//		public List<DocumentTypeMappingVO> getDocumnentTypeMappingByOrgId(Long orgId, Long branch)
+//				throws ApplicationException {
+//			return documentTypeMappingRepo.findByOrgIdAndBranch(orgId, branch);
+	//
+//		}
+
+		@Override
+		public DocumentTypeMappingResponseDTO getDocumentTypeMappingById(Long id) throws ApplicationException {
+			DocumentTypeMappingVO documentTypeMappingVO = documentTypeMappingRepo.findById(id)
+					.orElseThrow(() -> new ApplicationException("Document Type Mapping not found with id : " + id));
+
+			return convertToResponse(documentTypeMappingVO);
+		}
+
+		@Override
+		public List<DocumentTypeMappingResponseDTO> getDocumentTypeMappingByOrgId(Long orgId, Long branch)
+				throws ApplicationException {
+
+			List<DocumentTypeMappingVO> documentTypeMappingList = documentTypeMappingRepo.findByOrgIdAndBranch(orgId,
+					branch);
+
+			if (documentTypeMappingList == null || documentTypeMappingList.isEmpty()) {
+				throw new ApplicationException(
+						"Document Type Mapping not found for OrgId: " + orgId + " and Branch: " + branch);
+			}
+
+			List<DocumentTypeMappingResponseDTO> responseList = new ArrayList<>();
+
+			for (DocumentTypeMappingVO documentTypeMappingVO : documentTypeMappingList) {
+				responseList.add(convertToResponse(documentTypeMappingVO));
+			}
+
+			return responseList;
+		}
+		
+		@Override
+		public List<Map<String, Object>> getPendingDocumentTypeMapping(Long orgId, String branch, String branchCode,
+				String finYear, String finYearIdentifier) {
+			int finyear = Integer.parseInt(finYear.toString());
+			FinancialYearVO financialYearVO = financialYearRepo.findByOrgIdAndFinYear(orgId, finyear);
+			String finYearIden = financialYearVO.getFinYearId();
+			Set<Object[]> pendingDocTypeDetails = documentTypeMappingRepo.getPendingDoctypeMapping(orgId, branch,
+					branchCode, finYear, finYearIden);
+			return getPendingDocType(pendingDocTypeDetails);
+		}
+
+		private List<Map<String, Object>> getPendingDocType(Set<Object[]> pendingDocTypeDetails) {
+			List<Map<String, Object>> doctypeMappingDetails = new ArrayList<>();
+			for (Object[] sup : pendingDocTypeDetails) {
+				Map<String, Object> doctype = new HashMap<>();
+				doctype.put("screenName", sup[0] != null ? sup[0].toString() : "");
+				doctype.put("screenCode", sup[1] != null ? sup[1].toString() : "");
+				doctype.put("docCode", sup[2] != null ? sup[2].toString() : "");
+				doctype.put("finYear", sup[3] != null ? sup[3].toString() : "");
+				doctype.put("branch", sup[4] != null ? sup[4].toString() : "");
+				doctype.put("branchCode", sup[5] != null ? sup[5].toString() : "");
+				doctype.put("finYearIdentifier", sup[6] != null ? sup[6].toString() : "");
+				doctype.put("prefixField", sup[7] != null ? sup[7].toString() : "");
+				doctypeMappingDetails.add(doctype);
+			}
+
+			return doctypeMappingDetails;
+		}
 
 }

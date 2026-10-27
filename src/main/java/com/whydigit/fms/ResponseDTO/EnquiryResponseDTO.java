@@ -56,7 +56,7 @@ public class EnquiryResponseDTO {
 
     // Audit
     private Long orgId;
-    private String branch;
+    private BranchResponseDTO branch;
     private String active;
     private String cancel;
 

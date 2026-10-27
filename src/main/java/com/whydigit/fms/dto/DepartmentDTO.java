@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DepartmentDTO {
 	private Long id;
-	private String departmentName;
+	private String department;
 	private String code;
 	private boolean active;
 	private Long orgId;
 	private String createdBy;
-	private boolean cancel;
+//	private boolean cancel;
 }

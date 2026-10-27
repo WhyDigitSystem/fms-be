@@ -41,7 +41,7 @@ public class ProductVO {
 
     // Product Information
     @Column(name = "product_code")
-    private Long productCode;
+    private String productCode;
 
     @Column(name = "product_description")
     private String productDescription;

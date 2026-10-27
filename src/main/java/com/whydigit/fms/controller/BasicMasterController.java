@@ -396,7 +396,7 @@ public class BasicMasterController extends BaseController {
 	}
 
 	// GET CONFIGURATION BY ID
-	@GetMapping("/configById")
+	@GetMapping("/getConfigById")
 	public ResponseEntity<ResponseDTO> getConfigById(@RequestParam Long id) {
 
 		String methodName = "getConfigById()";
@@ -431,7 +431,7 @@ public class BasicMasterController extends BaseController {
 	}
 
 	// GET CONFIGURATIONS BY ORGANIZATION ID AND BRANCH
-	@GetMapping("/configbyOrgIdandBranch")
+	@GetMapping("/getConfigbyOrgIdandBranch")
 	public ResponseEntity<ResponseDTO> getConfigByOrgIdAndBranch(@RequestParam Long orgId, @RequestParam Long branch) {
 
 		String methodName = "getConfigByOrgIdAndBranch()";

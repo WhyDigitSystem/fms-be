@@ -17,60 +17,56 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="m_documenttypemappingdetails")
+@Table(name = "documenttypemapping_details")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class DocumentTypeMappingDetailsVO {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "m_documenttypemappingdetailsgen")
-	@SequenceGenerator(name = "m_documenttypemappingdetailsgen", sequenceName = "m_documenttypemappingdetailsseq", initialValue = 1000000001, allocationSize = 1)
-	@Column(name = "m_documenttypemappingdetailsid")
-	private Long id;
-	
-	@Column(name = "screencode",length =10)
-	private String screenCode;
-	
-	@Column(name = "screenname",length =25)
-	private String screenName;
-	
-	@Column(name = "client",length =150)
-	private String client;
-	
-	@Column(name = "clientcode",length =25)
-	private String clientCode;
-	
-	@Column(name = "doccode",length =25)
-	private String docCode;
-	
-	@Column(name = "branch",length =25)
-	private String branch;
-	
-	@Column(name = "branchcode",length =25)
-	private String branchCode;
-	
-	@Column(name = "prefixfield",length =25)
-	private String prefixField;
-	
-	@Column(name = "finyear",length =10)
-	private String finYear;
-	
-	@Column(name = "finyearidentifier",length =10)
-	private String finYearIdentifier;
-	
-	@Column(name = "orgid")
-	private Long orgId;
-	
-	@Column(name = "concatenation",length =25)
-	private String concatenation;
-	
-	@Column(name="lastno")
-	private int lastno=1;
-	
 
-	@JsonBackReference
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "documenttypemappingdetailsgen")
+	@SequenceGenerator(name = "documenttypemappingdetailsgen", sequenceName = "documenttypemappingdetailsseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "documenttypemappingdetails_id")
+	private Long id;
+
+	@Column(name = "screen_name")
+	private String screenName;
+
+	@Column(name = "screen_code")
+	private String screenCode;
+
+	@Column(name = "doc_code")
+	private String docCode;
+
+	@Column(name = "prefix")
+	private String prefix;
+
+	@Column(name = "org_id")
+	private Long orgId;
+
+
+	@Column(name = "fin_year", length = 10)
+	private String finYear;
+
+	@Column(name = "branch", length = 25)
+	private String branch;
+
+	@Column(name = "branch_code", length = 25)
+	private String branchCode;
+
+	@Column(name = "finyearidentifier", length = 50)
+	private String finYearIdentifier;
+
+	@Column(name = "concatenation", length = 25)
+	private String concatenation;
+
+	@Column(name = "last_no")
+	private int lastNo = 1;
+
+
+
 	@ManyToOne
-	@JoinColumn(name = "m_documenttypemappingid")
-	private DocumentTypeMappingVO documentTypeMappingVO;
+	@JoinColumn(name = "document_type_mapping_id")
+	@JsonBackReference
+	private DocumentTypeMappingVO documentTypeMappingMasterVO;
 }

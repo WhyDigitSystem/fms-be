@@ -12,9 +12,10 @@ public final class DesignationDTO {
 	private Long id;
 
 	private String designation;
+	private String code;
 	private Long orgId;
 	private boolean active;
-	private boolean cancel;
+//	private boolean cancel;
 	private String createdBy;
 
 }

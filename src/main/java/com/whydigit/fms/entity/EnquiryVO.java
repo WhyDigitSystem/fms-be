@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -111,8 +114,9 @@ public class EnquiryVO {
     @Column(name = "org_id")
     private Long orgId;
 
-    @Column(name = "branch_id")
-    private String branch;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch")
+    private BranchVO branch;
 
     @Column(name = "active")
     private boolean active = true;

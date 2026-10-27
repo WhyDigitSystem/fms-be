@@ -54,7 +54,7 @@ public class EnquiryDTO {
 
     // Audit
     private Long orgId;
-    private String branch;
+    private Long branch;
     private String remarks;
     private String cancelRemarks;
     private String createdBy;

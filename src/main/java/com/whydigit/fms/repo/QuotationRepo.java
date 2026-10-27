@@ -12,7 +12,7 @@ import com.whydigit.fms.entity.QuotationVO;
 @Service
 public interface QuotationRepo extends JpaRepository<QuotationVO, Long>{
 
-	@Query(nativeQuery = true, value = "select concat(prefix,lpad(last_no,5,0)) AS docid from documenttypemapping_details where org_id=?1 and  screen_code=?2")
+	 @Query(nativeQuery = true, value = "select concat(prefix,lpad(last_no,5,0)) AS docid from documenttypemapping_details where org_id=?1  and  screen_code=?2")
 	String getQuotationDocId(Long orgId, String screenCode);
 
 	@Query(value = "SELECT * FROM quotation WHERE org_id = :orgId "

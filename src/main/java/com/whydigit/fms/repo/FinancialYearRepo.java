@@ -20,9 +20,9 @@ public interface FinancialYearRepo extends JpaRepository<FinancialYearVO, Long> 
 
 	boolean existsByFinYearAndOrgId(int finYear, Long orgId);
 
-	boolean existsByFinYearIdentifierAndOrgId(String finYearIdentifier, Long orgId);
+//	boolean existsByFinYearIdentifierAndOrgId(String finYearIdentifier, Long orgId);
 
-	boolean existsByFinYearIdAndOrgId(Long finYearId, Long orgId);
+	boolean existsByFinYearIdAndOrgId(String string, Long orgId);
 
 	FinancialYearVO findByOrgIdAndFinYear(Long orgId, int finyear);
 
