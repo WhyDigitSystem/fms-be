@@ -477,6 +477,20 @@ public class SalesServiceImpl implements SalesService {
 
 		return result;
 	}
+	
+	@Override
+	public String getQuotationDocId(Long orgId) throws ApplicationException {
+
+		String screenCode = "QUO";
+
+		String result = quotationRepo.getQuotationDocId(orgId, screenCode);
+
+		if (!org.springframework.util.StringUtils.hasText(result)) {
+			throw new ApplicationException("Enquiry Doc ID Generation Failed");
+		}
+
+		return result;
+	}
 
 	@Override
 	@Transactional

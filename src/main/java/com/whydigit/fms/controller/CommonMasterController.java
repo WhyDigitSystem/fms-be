@@ -366,7 +366,7 @@ public class CommonMasterController extends BaseController {
 
 	// Currency
 
-	@GetMapping("/currency")
+	@GetMapping("/getAllCurrencyByOrgId")
 	public ResponseEntity<ResponseDTO> getAllCurrency(@RequestParam Long orgid) {
 		String methodName = "getAllCurrency()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
@@ -394,8 +394,8 @@ public class CommonMasterController extends BaseController {
 
 	// getCUrrencyById
 
-	@GetMapping("/currency/{currencyid}")
-	public ResponseEntity<ResponseDTO> getCurrencyById(@PathVariable Long currencyid) {
+	@GetMapping("/getCurrencyById")
+	public ResponseEntity<ResponseDTO> getCurrencyById(@RequestParam Long currencyid) {
 		String methodName = "getCurrencyById()";
 		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 		String errorMsg = null;

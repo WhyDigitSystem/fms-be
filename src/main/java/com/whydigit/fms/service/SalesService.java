@@ -38,5 +38,7 @@ public interface SalesService {
 
 	String getBookingDocId(Long orgId) throws ApplicationException;
 
+	String getQuotationDocId(Long orgId) throws ApplicationException;
+
 
 }

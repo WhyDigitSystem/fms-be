@@ -13,11 +13,12 @@ import com.whydigit.fms.entity.CurrencyVO;
 public interface CurrencyRepo extends JpaRepository<CurrencyVO, Long> {
 
 	@Query("select a from CurrencyVO a where a.orgId=?1")
-	List<CurrencyVO> findAll(Long orgid);
+	List<CurrencyVO> findCurrencyByOrgId(Long orgid);
 
 	boolean existsByCurrencyAndOrgId(String currency, Long orgId);
 
 	boolean existsByCurrencySymbolAndOrgId(String currencySymbol, Long orgId);
 
 	boolean existsBySubCurrencyAndOrgId(String subCurrency, Long orgId);
+
 }

@@ -771,7 +771,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Override
 	public List<CurrencyVO> getAllCurrency(Long orgid) {
 
-		return currencyRepo.findAll(orgid);
+		return currencyRepo.findCurrencyByOrgId(orgid);
 	}
 
 	@Override

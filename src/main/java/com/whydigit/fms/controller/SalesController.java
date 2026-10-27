@@ -157,6 +157,43 @@ public class SalesController extends BaseController {
 		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
 		return ResponseEntity.ok(responseDTO);
 	}
+	
+	@GetMapping("/getQuotationDocId")
+	public ResponseEntity<ResponseDTO> getQuotationDocId(@RequestParam Long orgId) {
+
+		String methodName = "getQuotationDocId()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		String errorMsg = null;
+		String quotationDocId = null;
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			quotationDocId = salesService.getQuotationDocId(orgId);
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
+
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+		}
+
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(errorMsg)) {
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Failed to retrieve Quotation DocId", errorMsg);
+
+		} else {
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Quotation DocId information retrieved successfully");
+
+			responseObjectsMap.put("quotationDocId", quotationDocId);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 
 	@PutMapping("/createUpdateQuotation")
 	public ResponseEntity<ResponseDTO> createUpdateQuotation(@RequestBody QuotationDTO quotationDTO) {
