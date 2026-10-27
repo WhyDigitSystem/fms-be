@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 @SpringBootApplication
 @EnableCaching
-public class WMSApplication {
+public class FMSApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WMSApplication.class, args);
+		SpringApplication.run(FMSApplication.class, args);
 	}
 
 }

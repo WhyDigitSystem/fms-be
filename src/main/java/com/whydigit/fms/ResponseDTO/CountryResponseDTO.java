@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CountryResponseDTO {
 
+
     private Long id;
-
-    private String countryName;
-
+    private String country;
     private String countryCode;
+
 }

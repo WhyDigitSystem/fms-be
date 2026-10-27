@@ -2,9 +2,12 @@ package com.whydigit.fms.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -30,12 +33,16 @@ public class CityVO {
 
 	@Column(name = "citycode",length =10)
 	private String cityCode;
-	@Column(name = "country",length =25)
-	private String country;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "country")
+	private CountryVO country;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "state")
+	private StateVO state;
+	
 	@Column(name = "city",length =25)
 	private String cityName;
-	@Column(name = "state",length =25)
-	private String state;
 	@Column(name = "active")
 	private boolean active;
 	@Column(name = "createdby",length =25)
@@ -45,8 +52,9 @@ public class CityVO {
 	@Column(name = "orgid")
 	private Long orgId;
 	@Column(name = "cancel")
-	private boolean cancel;
+	private boolean cancel = false;
 
+	
 	@JsonGetter("active")
 	public String getActive() {
 		return active ? "Active" : "In-Active";

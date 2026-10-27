@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.whydigit.fms.ResponseDTO.EnquiryResponseDTO;
+import com.whydigit.fms.ResponseDTO.QuotationResponseDTO;
 import com.whydigit.fms.common.CommonConstant;
 import com.whydigit.fms.common.UserConstants;
 import com.whydigit.fms.dto.EnquiryDTO;
+import com.whydigit.fms.dto.QuotationDTO;
 import com.whydigit.fms.dto.ResponseDTO;
 import com.whydigit.fms.service.SalesService;
-
 
 @RestController
 @RequestMapping("/api/sales")
@@ -32,166 +33,249 @@ public class SalesController extends BaseController {
 	@Autowired
 	SalesService salesService;
 
-@PutMapping("/createUpdateEnquiry")
-public ResponseEntity<ResponseDTO> createUpdateEnquiry(
-        @RequestBody EnquiryDTO enquiryDTO) {
+	@PutMapping("/createUpdateEnquiry")
+	public ResponseEntity<ResponseDTO> createUpdateEnquiry(@RequestBody EnquiryDTO enquiryDTO) {
 
-    String methodName = "createUpdateEnquiry()";
+		String methodName = "createUpdateEnquiry()";
+		Map<String, Object> responseObjectsMap = new HashMap<>();
 
-    Map<String, Object> responseObjectsMap = new HashMap<>();
-    ResponseDTO responseDTO;
+		try {
+			Map<String, Object> createdEnquiryVO = salesService.createUpdateEnquiry(enquiryDTO);
 
-    try {
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, createdEnquiryVO.get("message"));
 
-        Map<String, Object> createdEnquiryVO = salesService
-                .createUpdateEnquiry(enquiryDTO);
+			responseObjectsMap.put("enquiryVO", createdEnquiryVO.get("enquiryVO"));
 
-        responseObjectsMap.put(
-                CommonConstant.STRING_MESSAGE,
-                createdEnquiryVO.get("message"));
+			ResponseDTO responseDTO = createServiceResponse(responseObjectsMap);
 
-        responseObjectsMap.put(
-                "enquiryVO",
-                createdEnquiryVO.get("enquiryVO"));
+			return ResponseEntity.ok(responseDTO);
 
-        responseDTO = createServiceResponse(responseObjectsMap);
+		} catch (Exception e) {
 
-    } catch (Exception e) {
+			ResponseDTO responseDTO = createServiceResponseError(responseObjectsMap, "Enquiry creation/update failed",
+					e.getMessage());
 
-        responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                e.getMessage(),
-                e.getMessage());
-    }
+			return ResponseEntity.badRequest().body(responseDTO);
+		}
+	}
 
-    return ResponseEntity.ok(responseDTO);
-}
+	@GetMapping("/getEnquiryById")
+	public ResponseEntity<ResponseDTO> getEnquiryById(@RequestParam Long id) {
 
+		String methodName = "getEnquiryById()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
-@GetMapping("/getEnquiryById")
-public ResponseEntity<ResponseDTO> getEnquiryById(@RequestParam Long id) {
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-    String methodName = "getEnquiryById()";
-    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+		try {
+			EnquiryResponseDTO enquiryResponseDTO = salesService.getEnquiryById(id);
 
-    Map<String, Object> responseObjectsMap = new HashMap<>();
-    ResponseDTO responseDTO;
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Enquiry information retrieved successfully");
 
-    try {
-        EnquiryResponseDTO enquiryResponseDTO =
-                salesService.getEnquiryById(id);
+			responseObjectsMap.put("enquiryResponseVO", enquiryResponseDTO);
 
-        responseObjectsMap.put(
-                CommonConstant.STRING_MESSAGE,
-                "Enquiry information retrieved successfully");
+			responseDTO = createServiceResponse(responseObjectsMap);
 
-        responseObjectsMap.put("enquiryResponseVO", enquiryResponseDTO);
+		} catch (Exception e) {
 
-        responseDTO = createServiceResponse(responseObjectsMap);
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage());
 
-    } catch (Exception e) {
+			responseDTO = createServiceResponseError(responseObjectsMap, "Enquiry information retrieval failed",
+					e.getMessage());
+		}
 
-        LOGGER.error(
-                UserConstants.ERROR_MSG_METHOD_NAME,
-                methodName,
-                e.getMessage());
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 
-        responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                "Enquiry information retrieval failed",
-                e.getMessage());
-    }
+	@GetMapping("/getEnquiryByOrgId")
+	public ResponseEntity<ResponseDTO> getEnquiryByOrgId(@RequestParam Long orgId, @RequestParam String branch) {
 
-    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-    return ResponseEntity.ok(responseDTO);
-}
+		String methodName = "getEnquiryByOrgId()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-@GetMapping("/getEnquiryByOrgId")
-public ResponseEntity<ResponseDTO> getEnquiryByOrgId(
-        @RequestParam Long orgId,
-        @RequestParam String branch) {
+		try {
+			List<EnquiryResponseDTO> enquiryResponseDTO = salesService.getEnquiryByOrgId(orgId, branch);
 
-    String methodName = "getEnquiryByOrgId()";
-    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Enquiry information retrieved successfully");
 
-    Map<String, Object> responseObjectsMap = new HashMap<>();
-    ResponseDTO responseDTO;
+			responseObjectsMap.put("enquiryResponseVO", enquiryResponseDTO);
 
-    try {
-        List<EnquiryResponseDTO> enquiryResponseDTO =
-                salesService.getEnquiryByOrgId(orgId, branch);
+			responseDTO = createServiceResponse(responseObjectsMap);
 
-        responseObjectsMap.put(
-                CommonConstant.STRING_MESSAGE,
-                "Enquiry information retrieved successfully");
+		} catch (Exception e) {
 
-        responseObjectsMap.put("enquiryResponseVO", enquiryResponseDTO);
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage());
 
-        responseDTO = createServiceResponse(responseObjectsMap);
+			responseDTO = createServiceResponseError(responseObjectsMap, "Enquiry information retrieval failed",
+					e.getMessage());
+		}
 
-    } catch (Exception e) {
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 
-        LOGGER.error(
-                UserConstants.ERROR_MSG_METHOD_NAME,
-                methodName,
-                e.getMessage());
+	@GetMapping("/getEnquiryDocId")
+	public ResponseEntity<ResponseDTO> getEnquiryDocId(@RequestParam Long orgId) {
 
-        responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                "Enquiry information retrieval failed",
-                e.getMessage());
-    }
+		String methodName = "getEnquiryDocId()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
-    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-    return ResponseEntity.ok(responseDTO);
-}
+		String errorMsg = null;
+		String enquiryDocId = null;
 
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
 
-@GetMapping("/getEnquiryDocId")
-public ResponseEntity<ResponseDTO> getEnquiryDocId(
-        @RequestParam Long orgId) {
+		try {
+			enquiryDocId = salesService.getEnquiryDocId(orgId);
+		} catch (Exception e) {
+			errorMsg = e.getMessage();
 
-    String methodName = "getEnquiryDocId()";
-    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+		}
 
-    String errorMsg = null;
-    String enquiryDocId = null;
+		if (org.apache.commons.lang3.StringUtils.isNotBlank(errorMsg)) {
 
-    Map<String, Object> responseObjectsMap = new HashMap<>();
-    ResponseDTO responseDTO;
+			responseDTO = createServiceResponseError(responseObjectsMap, "Failed to retrieve Enquiry DocId", errorMsg);
 
-    try {
-        enquiryDocId = salesService.getEnquiryDocId(orgId);
-    } catch (Exception e) {
-        errorMsg = e.getMessage();
+		} else {
 
-        LOGGER.error(
-                UserConstants.ERROR_MSG_METHOD_NAME,
-                methodName,
-                errorMsg);
-    }
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Enquiry DocId information retrieved successfully");
 
-    if (org.apache.commons.lang3.StringUtils.isNotBlank(errorMsg)) {
+			responseObjectsMap.put("enquiryDocId", enquiryDocId);
 
-        responseDTO = createServiceResponseError(
-                responseObjectsMap,
-                "Failed to retrieve Enquiry DocId",
-                errorMsg);
+			responseDTO = createServiceResponse(responseObjectsMap);
+		}
 
-    } else {
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		return ResponseEntity.ok(responseDTO);
+	}
 
-        responseObjectsMap.put(
-                CommonConstant.STRING_MESSAGE,
-                "Enquiry DocId information retrieved successfully");
+	@PutMapping("/createUpdateQuotation")
+	public ResponseEntity<ResponseDTO> createUpdateQuotation(@RequestBody QuotationDTO quotationDTO) {
 
-        responseObjectsMap.put("enquiryDocId", enquiryDocId);
+		String methodName = "createUpdateQuotation()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
-        responseDTO = createServiceResponse(responseObjectsMap);
-    }
+		Map<String, Object> responseObjectsMap = new HashMap<>();
 
-    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-    return ResponseEntity.ok(responseDTO);
-}
+		try {
+			Map<String, Object> result = salesService.createUpdateQuotation(quotationDTO);
 
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, result.get("message"));
+
+			responseObjectsMap.put("quotationVO", result.get("quotationVO"));
+
+			ResponseDTO responseDTO = createServiceResponse(responseObjectsMap);
+
+			return ResponseEntity.ok(responseDTO);
+
+		} catch (Exception e) {
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage());
+
+			ResponseDTO responseDTO = createServiceResponseError(responseObjectsMap, "Quotation creation/update failed",
+					e.getMessage());
+
+			return ResponseEntity.badRequest().body(responseDTO);
+
+		} finally {
+			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+		}
+	}
+
+	// =========================================================
+	// GET QUOTATION BY ID
+	// =========================================================
+	@GetMapping("/getQuotationById")
+	public ResponseEntity<ResponseDTO> getQuotationById(
+	        @RequestParam Long id) {
+
+	    String methodName = "getQuotationById()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+	    try {
+	        QuotationResponseDTO quotationDTO =
+	                salesService.getQuotationById(id);
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                "Quotation information retrieved successfully");
+
+	        responseObjectsMap.put("quotationVO", quotationDTO);
+
+	        ResponseDTO responseDTO =
+	                createServiceResponse(responseObjectsMap);
+
+	        return ResponseEntity.ok(responseDTO);
+
+	    } catch (Exception e) {
+	        LOGGER.error(
+	                UserConstants.ERROR_MSG_METHOD_NAME,
+	                methodName,
+	                e.getMessage());
+
+	        ResponseDTO responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Quotation information retrieval failed",
+	                e.getMessage());
+
+	        return ResponseEntity.badRequest().body(responseDTO);
+
+	    } finally {
+	        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    }
+	}
+
+	// =========================================================
+	// GET QUOTATION BY ORG ID AND BRANCH
+	// =========================================================
+	@GetMapping("/getQuotationByOrgIdAndBranch")
+	public ResponseEntity<ResponseDTO> getQuotationByOrgIdAndBranch(
+	        @RequestParam Long orgId,
+	        @RequestParam Long branch) {
+
+	    String methodName = "getQuotationByOrgIdAndBranch()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+	    try {
+	        List<QuotationResponseDTO> quotationList =
+	                salesService.getQuotationByOrgIdAndBranch(orgId, branch);
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                "Quotation information retrieved successfully");
+
+	        responseObjectsMap.put("quotationVO", quotationList);
+
+	        ResponseDTO responseDTO =
+	                createServiceResponse(responseObjectsMap);
+
+	        return ResponseEntity.ok(responseDTO);
+
+	    } catch (Exception e) {
+	        LOGGER.error(
+	                UserConstants.ERROR_MSG_METHOD_NAME,
+	                methodName,
+	                e.getMessage());
+
+	        ResponseDTO responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Quotation information retrieval failed",
+	                e.getMessage());
+
+	        return ResponseEntity.badRequest().body(responseDTO);
+
+	    } finally {
+	        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    }
+	}
 }

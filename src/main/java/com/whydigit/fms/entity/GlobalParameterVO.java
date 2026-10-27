@@ -3,9 +3,12 @@ package com.whydigit.fms.entity;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -32,18 +35,14 @@ public class GlobalParameterVO {
 	private Long orgId;
 	@Column(name = "userid",length =25)
 	private String userid;
-	@Column(name = "warehouse",length =25)
-	private String warehouse;
-	@Column(name = "branch",length =25)
-	private String branch;
-	@Column(name = "branchcode",length =25)
-	private String branchcode;
-	@Column(name = "customer",length =150)
-	private String customer;
-	@Column(name = "client",length =150)
-	private String client;
-	@Column(name = "finyear",length =10)
-	private String finYear;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch")
+    private BranchVO branch;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "financialyear")
+    private FinancialYearVO financialYear;
 	
 	@Embedded
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
