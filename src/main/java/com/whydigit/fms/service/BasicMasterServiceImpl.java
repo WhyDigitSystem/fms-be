@@ -459,7 +459,7 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 			countryResponse.setId(portVO.getCountry().getId());
 
-			countryResponse.setCountryName(portVO.getCountry().getCountryName());
+			countryResponse.setCountry(portVO.getCountry().getCountryName());
 
 			countryResponse.setCountryCode(portVO.getCountry().getCountryCode());
 
