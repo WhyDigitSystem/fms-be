@@ -15,27 +15,27 @@ public class EnquiryDTO {
     private Long id;
 
     // Enquiry Information
-    private String customer;
+    private String company;
     private String movement;
 
     // Shipment Mode
     private String shipmentMode;
 
     // Route
-    private String fromLocation;
-    private String toLocation;
+    private Long fromLocation;
+    private Long toLocation;
 
     // Sea
-    private String originPort;
-    private String destinationPort;
+    private Long originPort;
+    private Long destinationPort;
 
     // Air
-    private String originAirport;
-    private String destinationAirport;
+    private Long originAirport;
+    private Long destinationAirport;
 
     // Road
-    private String originTerminal;
-    private String destinationTerminal;
+    private Long originTerminal;
+    private Long destinationTerminal;
 
     // Cargo
     private String cargoDescription;
@@ -54,7 +54,7 @@ public class EnquiryDTO {
 
     // Audit
     private Long orgId;
-    private String branch;
+    private Long branch;
     private String remarks;
     private String cancelRemarks;
     private String createdBy;

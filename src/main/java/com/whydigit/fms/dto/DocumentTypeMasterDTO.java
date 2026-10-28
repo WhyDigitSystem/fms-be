@@ -7,16 +7,17 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentTypeDTO {
-	
+public class DocumentTypeMasterDTO {
+
 	private Long id;
 	private String screenCode;
 	private String screenName;
 	private String description;
 	private String docCode;
 	private String createdBy;
-	private Long orgId;	
-//	private List<DocumentTypeDetailsDTO> documentTypeDetailsDTO;
-//	
+	private Long orgId;
+ 	 
+ 	 
 
 }
+

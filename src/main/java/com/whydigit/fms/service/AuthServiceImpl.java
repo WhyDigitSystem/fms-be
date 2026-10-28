@@ -36,6 +36,7 @@ import com.whydigit.fms.dto.UserLoginBranchAccessDTO;
 import com.whydigit.fms.dto.UserLoginClientAccessDTO;
 import com.whydigit.fms.dto.UserLoginRoleAccessDTO;
 import com.whydigit.fms.dto.UserResponseDTO;
+import com.whydigit.fms.entity.BranchVO;
 import com.whydigit.fms.entity.ResponsibilityVO;
 import com.whydigit.fms.entity.RolesResponsibilityVO;
 import com.whydigit.fms.entity.RolesVO;
@@ -46,6 +47,7 @@ import com.whydigit.fms.entity.UserLoginClientAccessVO;
 import com.whydigit.fms.entity.UserLoginRolesVO;
 import com.whydigit.fms.entity.UserVO;
 import com.whydigit.fms.exception.ApplicationException;
+import com.whydigit.fms.repo.BranchRepo;
 import com.whydigit.fms.repo.ResponsibilitiesRepo;
 import com.whydigit.fms.repo.RolesRepo;
 import com.whydigit.fms.repo.RolesResponsibilityRepo;
@@ -81,6 +83,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	UserClientAccessRepo clientAccessRepo;
+	
+	@Autowired
+	BranchRepo branchRepo;
 
 //	@Autowired
 //	ClientRepo clientRepo;
@@ -189,8 +194,11 @@ public class AuthServiceImpl implements AuthService {
 		if (signUpFormDTO.getBranchAccessDTOList() != null) {
 			for (UserLoginBranchAccessDTO userLoginBranchAccessDTO : signUpFormDTO.getBranchAccessDTOList()) {
 				UserLoginBranchAccessibleVO branchAccessibleVO = new UserLoginBranchAccessibleVO();
-				branchAccessibleVO.setBranch(userLoginBranchAccessDTO.getBranch());
-				branchAccessibleVO.setBranchcode(userLoginBranchAccessDTO.getBranchCode());
+				BranchVO branchVO = branchRepo
+				        .findById(userLoginBranchAccessDTO.getBranch())
+				        .orElseThrow(() -> new RuntimeException("Branch Not Found"));
+
+				branchAccessibleVO.setBranch(branchVO);				
 				branchAccessibleVO.setUserVO(userVO);
 				branchAccessList.add(branchAccessibleVO);
 			}

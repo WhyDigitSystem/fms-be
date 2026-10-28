@@ -1,6 +1,7 @@
 package com.whydigit.fms.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,40 +20,65 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.whydigit.fms.ResponseDTO.BranchResponseDTO;
+import com.whydigit.fms.ResponseDTO.CityResponseDTO;
+import com.whydigit.fms.ResponseDTO.CountryResponseDTO;
+import com.whydigit.fms.ResponseDTO.DocumentTypeMappingBranchResponseDTO;
+import com.whydigit.fms.ResponseDTO.DocumentTypeMappingDetailsResponseDTO;
+import com.whydigit.fms.ResponseDTO.DocumentTypeMappingResponseDTO;
+import com.whydigit.fms.ResponseDTO.FinancialYearResponseDTO;
+import com.whydigit.fms.ResponseDTO.GlobalParameterResponseDTO;
+import com.whydigit.fms.ResponseDTO.StateDetailResponseDTO;
+import com.whydigit.fms.ResponseDTO.StateResponseDTO;
 import com.whydigit.fms.dto.CityDTO;
 import com.whydigit.fms.dto.CompanyDTO;
 import com.whydigit.fms.dto.CountryDTO;
 import com.whydigit.fms.dto.CurrencyDTO;
 import com.whydigit.fms.dto.DepartmentDTO;
 import com.whydigit.fms.dto.DesignationDTO;
+import com.whydigit.fms.dto.DocumentTypeMappingDTO;
+import com.whydigit.fms.dto.DocumentTypeMappingDetailsDTO;
+import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
+import com.whydigit.fms.dto.GlobalParameterDTO;
+import com.whydigit.fms.dto.ModeMasterDTO;
 import com.whydigit.fms.dto.Role;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
 import com.whydigit.fms.dto.UserProfileInformationDTO;
+import com.whydigit.fms.entity.BranchVO;
 import com.whydigit.fms.entity.CityVO;
 import com.whydigit.fms.entity.CompanyVO;
 import com.whydigit.fms.entity.CountryVO;
 import com.whydigit.fms.entity.CurrencyVO;
 import com.whydigit.fms.entity.DepartmentVO;
 import com.whydigit.fms.entity.DesignationVO;
+import com.whydigit.fms.entity.DocumentTypeMappingDetailsVO;
+import com.whydigit.fms.entity.DocumentTypeMappingVO;
+import com.whydigit.fms.entity.DocumentTypeMasterVO;
 import com.whydigit.fms.entity.EmployeeVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
+import com.whydigit.fms.entity.ModeMasterVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
 import com.whydigit.fms.entity.StateVO;
 import com.whydigit.fms.entity.UserProfileInformationVO;
 import com.whydigit.fms.entity.UserVO;
 import com.whydigit.fms.exception.ApplicationException;
+import com.whydigit.fms.repo.BranchRepo;
 import com.whydigit.fms.repo.CityRepo;
 import com.whydigit.fms.repo.CompanyRepo;
 import com.whydigit.fms.repo.CountryRepository;
 import com.whydigit.fms.repo.CurrencyRepo;
 import com.whydigit.fms.repo.DepartmentRepo;
 import com.whydigit.fms.repo.DesignationRepo;
+import com.whydigit.fms.repo.DocumentTypeMappingDetailsRepo;
+import com.whydigit.fms.repo.DocumentTypeMappingRepo;
+import com.whydigit.fms.repo.DocumentTypeMasterRepo;
 import com.whydigit.fms.repo.EmployeeRepo;
 import com.whydigit.fms.repo.FinancialYearRepo;
 import com.whydigit.fms.repo.GlobalParameterRepo;
+import com.whydigit.fms.repo.ModeMasterRepo;
 import com.whydigit.fms.repo.ScreenNamesRepo;
 import com.whydigit.fms.repo.StateRepo;
 import com.whydigit.fms.repo.UserBranchAccessRepo;
@@ -66,7 +93,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	public static final Logger LOGGER = LoggerFactory.getLogger(CommonMasterServiceImpl.class);
 
 	@Autowired
-	CountryRepository countryVORepo;
+	CountryRepository countryRepo;
 
 	@Autowired
 	CurrencyRepo currencyRepo;
@@ -79,7 +106,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 
 	@Autowired
 	CityRepo cityRepo;
-
 
 	@Autowired
 	ScreenNamesRepo screenNamesRepo;
@@ -96,7 +122,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Autowired
 	GlobalParameterRepo globalParameterRepo;
 
-	
 	@Autowired
 	UserBranchAccessRepo userBranchAccessRepo;
 
@@ -106,7 +131,8 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Autowired
 	EmployeeRepo employeeRepo;
 
-
+	@Autowired
+	BranchRepo branchRepo;
 	@Autowired
 	DesignationRepo designationRepo;
 
@@ -116,16 +142,28 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Autowired
 	UserProfileInformationRepo userProfileInformationRepo;
 
+	@Autowired
+	DocumentTypeMasterRepo documentTypeMasterRepo;
+
+	@Autowired
+	DocumentTypeMappingRepo documentTypeMappingRepo;
+
+	@Autowired
+	DocumentTypeMappingDetailsRepo documentTypeMappingDetailsRepo;
+
+	@Autowired
+	private ModeMasterRepo modeMasterRepo;
+
 	// Country
 
 	@Override
 	public List<CountryVO> getAllCountry(Long orgid) {
-		return countryVORepo.findAll(orgid);
+		return countryRepo.findAll(orgid);
 	}
 
 	@Override
 	public Optional<CountryVO> getCountryById(Long countryid) {
-		return countryVORepo.findById(countryid);
+		return countryRepo.findById(countryid);
 	}
 
 	@Override
@@ -135,7 +173,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 		String message = null;
 
 		if (ObjectUtils.isEmpty(countryDTO.getId())) {
-			if (countryVORepo.existsByCountryNameAndCountryCodeAndOrgId(countryDTO.getCountryName(),
+			if (countryRepo.existsByCountryNameAndCountryCodeAndOrgId(countryDTO.getCountryName(),
 					countryDTO.getCountryCode(), countryDTO.getOrgId())) {
 				String errorMessage = String.format(
 						"The CountryName: %s and CountryCode: %s already exists This Organization.",
@@ -143,13 +181,13 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 				throw new ApplicationException(errorMessage);
 			}
 
-			if (countryVORepo.existsByCountryNameAndOrgId(countryDTO.getCountryName(), countryDTO.getOrgId())) {
+			if (countryRepo.existsByCountryNameAndOrgId(countryDTO.getCountryName(), countryDTO.getOrgId())) {
 				String errorMessage = String.format("The CountryName: %s already exists This Organization.",
 						countryDTO.getCountryName());
 				throw new ApplicationException(errorMessage);
 			}
 
-			if (countryVORepo.existsByCountryCodeAndOrgId(countryDTO.getCountryCode(), countryDTO.getOrgId())) {
+			if (countryRepo.existsByCountryCodeAndOrgId(countryDTO.getCountryCode(), countryDTO.getOrgId())) {
 				String errorMessage = String.format("The CountryCode: %s already exists This Organization.",
 						countryDTO.getCountryCode());
 				throw new ApplicationException(errorMessage);
@@ -158,11 +196,11 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 		}
 		if (countryDTO.getId() != null) {
 			// Update existing branch
-			countryVO = countryVORepo.findById(countryDTO.getId())
+			countryVO = countryRepo.findById(countryDTO.getId())
 					.orElseThrow(() -> new ApplicationException("Branch not found with id: " + countryDTO.getId()));
 			countryVO.setUpdatedBy(countryDTO.getCreatedBy());
 			if (!countryVO.getCountryCode().equalsIgnoreCase(countryDTO.getCountryCode())) {
-				if (countryVORepo.existsByCountryCodeAndOrgId(countryDTO.getCountryCode(), countryDTO.getOrgId())) {
+				if (countryRepo.existsByCountryCodeAndOrgId(countryDTO.getCountryCode(), countryDTO.getOrgId())) {
 					String errorMessage = String.format("The CountryCode: %s already exists This Organization.",
 							countryDTO.getCountryCode());
 					throw new ApplicationException(errorMessage);
@@ -170,7 +208,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 				countryVO.setCountryCode(countryDTO.getCountryCode().toUpperCase());
 			}
 			if (!countryVO.getCountryName().equalsIgnoreCase(countryDTO.getCountryName())) {
-				if (countryVORepo.existsByCountryNameAndOrgId(countryDTO.getCountryName(), countryDTO.getOrgId())) {
+				if (countryRepo.existsByCountryNameAndOrgId(countryDTO.getCountryName(), countryDTO.getOrgId())) {
 					String errorMessage = String.format("The CountryName: %s already exists This Organization.",
 							countryDTO.getCountryName());
 					throw new ApplicationException(errorMessage);
@@ -188,10 +226,10 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 		}
 
 		getCountryVOFromCounytryDTO(countryVO, countryDTO);
-		countryVORepo.save(countryVO);
+		countryRepo.save(countryVO);
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("message", message);
-		response.put("countryVO", countryVO);
+		response.put("createdCountryVO", countryVO);
 		return response;
 
 	}
@@ -208,25 +246,49 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Override
 	public void deleteCountry(Long countryid) {
 
-		countryVORepo.deleteById(countryid);
+		countryRepo.deleteById(countryid);
 	}
 
 	// State
 
 	@Override
-	public List<StateVO> getAllgetAllStates(Long orgid) {
-		return stateRepo.findAllByOrgId(orgid);
+	public List<StateResponseDTO> getAllStateByOrgId(Long orgid) {
+
+		List<StateVO> stateVOList = stateRepo.findAllByOrgId(orgid);
+
+		List<StateResponseDTO> stateResponseDTOList = new ArrayList<>();
+
+		for (StateVO stateVO : stateVOList) {
+			stateResponseDTOList.add(getStateResponseDTO(stateVO));
+		}
+
+		return stateResponseDTOList;
 	}
 
 	@Override
-	public Optional<StateVO> getStateById(Long stateid) {
-		return stateRepo.findById(stateid);
+	public Optional<StateResponseDTO> getStateById(Long stateid) {
+
+		Optional<StateVO> stateVO = stateRepo.findById(stateid);
+
+		if (stateVO.isPresent()) {
+			return Optional.of(getStateResponseDTO(stateVO.get()));
+		}
+
+		return Optional.empty();
 	}
 
 	@Override
-	public List<StateVO> getStatesByCountry(Long orgid, String country) {
+	public List<StateResponseDTO> getStatesByCountry(Long orgid, Long country) {
 
-		return stateRepo.findByCountry(orgid, country);
+		List<StateVO> stateVOList = stateRepo.findByCountry(orgid, country);
+
+		List<StateResponseDTO> stateResponseDTOList = new ArrayList<>();
+
+		for (StateVO stateVO : stateVOList) {
+			stateResponseDTOList.add(getStateResponseDTO(stateVO));
+		}
+
+		return stateResponseDTOList;
 	}
 
 	@Override
@@ -299,27 +361,58 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 		getStateVOFromStateDTO(stateVO, stateDTO);
 
 		// Save the entity
-		stateRepo.save(stateVO);
+		stateVO = stateRepo.save(stateVO);
 
 		// Prepare the response
 		Map<String, Object> response = new HashMap<>();
 		response.put("message", message);
-		response.put("stateVO", stateVO);
+		response.put("stateVO", getStateResponseDTO(stateVO));
 
 		return response;
+
 	}
 
 	private void getStateVOFromStateDTO(StateVO stateVO, StateDTO stateDTO) {
 		stateVO.setStateCode(stateDTO.getStateCode().toUpperCase());
 		stateVO.setStateName(stateDTO.getStateName().toUpperCase());
 		stateVO.setStateNumber(stateDTO.getStateNumber().toUpperCase());
-		stateVO.setCountry(stateDTO.getCountry().toUpperCase());
+		CountryVO countryVO = countryRepo.findById(stateDTO.getCountry())
+				.orElseThrow(() -> new RuntimeException("Country Not Found"));
+
+		stateVO.setCountry(countryVO);
 		stateVO.setRegion(stateDTO.getRegion().toUpperCase());
 		stateVO.setActive(stateDTO.isActive());
-		stateVO.setCancel(stateDTO.isCancel());
 		stateVO.setOrgId(stateDTO.getOrgId());
 		// stateVO.setDupchk(stateDTO.getOrgId() + stateDTO.getStateCode() +
 		// stateDTO.getStateName());
+	}
+
+	private StateResponseDTO getStateResponseDTO(StateVO stateVO) {
+
+		StateResponseDTO stateResponseDTO = new StateResponseDTO();
+
+		stateResponseDTO.setId(stateVO.getId());
+		stateResponseDTO.setStateCode(stateVO.getStateCode());
+		stateResponseDTO.setStateName(stateVO.getStateName());
+		stateResponseDTO.setRegion(stateVO.getRegion());
+		stateResponseDTO.setStateNumber(stateVO.getStateNumber());
+		stateResponseDTO.setActive(stateVO.getActive());
+		stateResponseDTO.setCreatedBy(stateVO.getCreatedBy());
+		stateResponseDTO.setUpdatedBy(stateVO.getUpdatedBy());
+		stateResponseDTO.setOrgId(stateVO.getOrgId());
+
+		if (stateVO.getCountry() != null) {
+
+			CountryResponseDTO countryResponseDTO = new CountryResponseDTO();
+
+			countryResponseDTO.setId(stateVO.getCountry().getId());
+			countryResponseDTO.setCountry(stateVO.getCountry().getCountryName());
+			countryResponseDTO.setCountryCode(stateVO.getCountry().getCountryCode());
+
+			stateResponseDTO.setCountry(countryResponseDTO);
+		}
+
+		return stateResponseDTO;
 	}
 
 	@Override
@@ -328,49 +421,80 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	}
 
 	// City
-
 	@Override
-	public List<CityVO> getAllgetAllCities(Long orgid) {
-		return cityRepo.findAll(orgid);
+	public List<CityResponseDTO> getAllCityByOrgId(Long orgid) {
+
+		List<CityVO> cityVOList = cityRepo.findAll(orgid);
+
+		List<CityResponseDTO> cityResponseDTOList = new ArrayList<>();
+
+		for (CityVO cityVO : cityVOList) {
+			cityResponseDTOList.add(getCityResponseDTO(cityVO));
+		}
+
+		return cityResponseDTOList;
 	}
 
 	@Override
-	public List<CityVO> getAllCitiesByState(Long orgid, String state) {
+	public List<CityResponseDTO> getCityByOrgIdAndstate(Long orgid, Long state) {
 
-		return cityRepo.findAll(orgid, state);
+		List<CityVO> cityVOList = cityRepo.getAllCitiesByState(orgid, state);
+
+		List<CityResponseDTO> cityResponseDTOList = new ArrayList<>();
+
+		for (CityVO cityVO : cityVOList) {
+			cityResponseDTOList.add(getCityResponseDTO(cityVO));
+		}
+
+		return cityResponseDTOList;
 	}
 
 	@Override
-	public Optional<CityVO> getCityById(Long cityid) {
-		return cityRepo.findById(cityid);
+	public Optional<CityResponseDTO> getCityById(Long cityid) {
+
+		Optional<CityVO> cityVO = cityRepo.findById(cityid);
+
+		if (cityVO.isPresent()) {
+			return Optional.of(getCityResponseDTO(cityVO.get()));
+		}
+
+		return Optional.empty();
 	}
 
 	@Override
 	@Transactional
 	public Map<String, Object> createUpdateCity(CityDTO cityDTO) throws ApplicationException {
+
 		CityVO cityVO;
 		String message;
 
 		if (ObjectUtils.isEmpty(cityDTO.getId())) {
+
 			if (cityRepo.existsByCityCodeAndOrgId(cityDTO.getCityCode(), cityDTO.getOrgId())) {
 				String errorMessage = String.format("The CityCode: %s already exists in this organization.",
 						cityDTO.getCityCode());
 				throw new ApplicationException(errorMessage);
 			}
+
 			if (cityRepo.existsByCityNameAndOrgId(cityDTO.getCityName(), cityDTO.getOrgId())) {
 				String errorMessage = String.format("The CityName: %s already exists in this organization.",
 						cityDTO.getCityName());
 				throw new ApplicationException(errorMessage);
 			}
+
 			// Create new city
 			cityVO = new CityVO();
 			cityVO.setCreatedBy(cityDTO.getCreatedBy());
 			cityVO.setUpdatedBy(cityDTO.getCreatedBy());
+
 			message = "City Created Successfully";
+
 		} else {
+
 			// Update existing city
 			cityVO = cityRepo.findById(cityDTO.getId())
 					.orElseThrow(() -> new ApplicationException("City not found with id: " + cityDTO.getId()));
+
 			cityVO.setUpdatedBy(cityDTO.getCreatedBy());
 
 			if (!cityVO.getCityCode().equalsIgnoreCase(cityDTO.getCityCode())) {
@@ -379,6 +503,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 							cityDTO.getCityCode());
 					throw new ApplicationException(errorMessage);
 				}
+
 				cityVO.setCityCode(cityDTO.getCityCode().toUpperCase());
 			}
 
@@ -388,36 +513,90 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 							cityDTO.getCityName());
 					throw new ApplicationException(errorMessage);
 				}
+
 				cityVO.setCityName(cityDTO.getCityName().toUpperCase());
 			}
+
 			message = "City Updated Successfully";
 		}
 
+		// Map DTO to entity
 		getCityVOFromCityDTO(cityVO, cityDTO);
-		cityRepo.save(cityVO);
 
+		// Save the entity
+		CityVO savedCity = cityRepo.save(cityVO);
+
+		// Prepare the response
 		Map<String, Object> response = new HashMap<>();
 		response.put("message", message);
-		response.put("cityVO", cityVO);
+		response.put("cityVO", getCityResponseDTO(savedCity));
+
 		return response;
 	}
 
 	private void getCityVOFromCityDTO(CityVO cityVO, CityDTO cityDTO) {
+
 		cityVO.setCityCode(cityDTO.getCityCode().toUpperCase());
 		cityVO.setCityName(cityDTO.getCityName().toUpperCase());
-		cityVO.setCountry(cityDTO.getCountry().toUpperCase());
-		cityVO.setState(cityDTO.getState().toUpperCase());
+
+		CountryVO countryVO = countryRepo.findById(cityDTO.getCountry())
+				.orElseThrow(() -> new RuntimeException("Country Not Found"));
+
+		cityVO.setCountry(countryVO);
+
+		StateVO stateVO = stateRepo.findById(cityDTO.getState())
+				.orElseThrow(() -> new RuntimeException("State Not Found"));
+
+		cityVO.setState(stateVO);
+
 		cityVO.setActive(cityDTO.isActive());
 		cityVO.setOrgId(cityDTO.getOrgId());
-		cityVO.setCancel(cityDTO.isCancel());
+	}
+
+	private CityResponseDTO getCityResponseDTO(CityVO cityVO) {
+
+		CityResponseDTO cityResponseDTO = new CityResponseDTO();
+
+		cityResponseDTO.setId(cityVO.getId());
+		cityResponseDTO.setCityCode(cityVO.getCityCode());
+		cityResponseDTO.setCityName(cityVO.getCityName());
+		cityResponseDTO.setActive(cityVO.getActive());
+		cityResponseDTO.setCreatedBy(cityVO.getCreatedBy());
+		cityResponseDTO.setUpdatedBy(cityVO.getUpdatedBy());
+		cityResponseDTO.setOrgId(cityVO.getOrgId());
+		cityResponseDTO.setCancel(cityVO.getCancel());
+
+		// Map CountryResponseDTO
+		if (cityVO.getCountry() != null) {
+
+			CountryResponseDTO countryResponseDTO = new CountryResponseDTO();
+
+			countryResponseDTO.setId(cityVO.getCountry().getId());
+			countryResponseDTO.setCountry(cityVO.getCountry().getCountryName());
+			countryResponseDTO.setCountryCode(cityVO.getCountry().getCountryCode());
+
+			cityResponseDTO.setCountry(countryResponseDTO);
+		}
+
+		// Map StateResponseDTO
+		if (cityVO.getState() != null) {
+
+			StateDetailResponseDTO stateResponseDTO = new StateDetailResponseDTO();
+
+			stateResponseDTO.setId(cityVO.getState().getId());
+			stateResponseDTO.setStateCode(cityVO.getState().getStateCode());
+			stateResponseDTO.setStateName(cityVO.getState().getStateName());
+
+			cityResponseDTO.setState(stateResponseDTO);
+		}
+
+		return cityResponseDTO;
 	}
 
 	@Override
 	public void deleteCity(Long cityid) {
 		cityRepo.deleteById(cityid);
 	}
-
-	
 
 	// Company
 
@@ -594,7 +773,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	@Override
 	public List<CurrencyVO> getAllCurrency(Long orgid) {
 
-		return currencyRepo.findAll(orgid);
+		return currencyRepo.findCurrencyByOrgId(orgid);
 	}
 
 	@Override
@@ -706,34 +885,102 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 
 	// Change Global Parameter or update Parameters
 	@Override
-	public GlobalParameterVO updateGlobaParameter(GlobalParameterVO globalParameterVO) {
+	public GlobalParameterResponseDTO updateGlobaParameter(GlobalParameterDTO globalParameterDTO) {
 
-		GlobalParameterVO existingRecord = globalParameterRepo.findGlobalParam(globalParameterVO.getOrgId(),
-				globalParameterVO.getUserid());
+		GlobalParameterVO existingRecord = globalParameterRepo.findGlobalParam(globalParameterDTO.getOrgId(),
+				globalParameterDTO.getUserid());
+
+		GlobalParameterVO savedRecord;
 
 		if (existingRecord != null) {
-			// If the record exists, it's a PUT operation
-			existingRecord.setBranch(globalParameterVO.getBranch());
-			existingRecord.setBranchcode(globalParameterVO.getBranchcode());
-			existingRecord.setCustomer(globalParameterVO.getCustomer());
-			existingRecord.setClient(globalParameterVO.getClient());
-			existingRecord.setWarehouse(globalParameterVO.getWarehouse());
-			existingRecord.setOrgId(globalParameterVO.getOrgId());
-			existingRecord.setUserid(globalParameterVO.getUserid());
 
-			return globalParameterRepo.save(existingRecord);
+			// Update existing record
+			existingRecord.setOrgId(globalParameterDTO.getOrgId());
+			existingRecord.setUserid(globalParameterDTO.getUserid());
+
+			existingRecord.setBranch(branchRepo.findById(globalParameterDTO.getBranch())
+					.orElseThrow(() -> new RuntimeException("Branch Not Found")));
+
+			existingRecord.setFinancialYear(financialYearRepo.findById(globalParameterDTO.getFinancialYear())
+					.orElseThrow(() -> new RuntimeException("Financial Year Not Found")));
+
+			savedRecord = globalParameterRepo.save(existingRecord);
+
 		} else {
-			// If the record doesn't exist, it's a POST operation
-			return globalParameterRepo.save(globalParameterVO);
+
+			// Create new record
+			GlobalParameterVO globalParameterVO = new GlobalParameterVO();
+
+			globalParameterVO.setOrgId(globalParameterDTO.getOrgId());
+			globalParameterVO.setUserid(globalParameterDTO.getUserid());
+
+			globalParameterVO.setBranch(branchRepo.findById(globalParameterDTO.getBranch())
+					.orElseThrow(() -> new RuntimeException("Branch Not Found")));
+
+			globalParameterVO.setFinancialYear(financialYearRepo.findById(globalParameterDTO.getFinancialYear())
+					.orElseThrow(() -> new RuntimeException("Financial Year Not Found")));
+
+			savedRecord = globalParameterRepo.save(globalParameterVO);
 		}
 
+		return convertToGlobalParameterResponse(savedRecord);
+	}
+
+	private GlobalParameterResponseDTO convertToGlobalParameterResponse(GlobalParameterVO vo) {
+
+		GlobalParameterResponseDTO dto = new GlobalParameterResponseDTO();
+
+		dto.setId(vo.getId());
+		dto.setOrgId(vo.getOrgId());
+		dto.setUserid(vo.getUserid());
+
+		// Branch mapping
+		if (vo.getBranch() != null) {
+
+			BranchResponseDTO branchDTO = new BranchResponseDTO();
+
+			branchDTO.setId(vo.getBranch().getId());
+			branchDTO.setBranch(vo.getBranch().getBranch());
+			branchDTO.setBranchCode(vo.getBranch().getBranchCode());
+
+			dto.setBranch(branchDTO);
+		}
+
+		// Financial year mapping
+		if (vo.getFinancialYear() != null) {
+
+			FinancialYearResponseDTO financialYearDTO = new FinancialYearResponseDTO();
+
+			financialYearDTO.setId(vo.getFinancialYear().getId());
+			financialYearDTO.setFinYear(vo.getFinancialYear().getFinYear());
+
+			dto.setFinancialYear(financialYearDTO);
+		}
+
+		return dto;
 	}
 
 	// get access Branch
 	@Override
-	public Set<Object[]> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(Long orgid, String userName) {
+	public List<Map<String, Object>> getGlobalParametersBranchAndBranchCodeByOrgIdAndUserName(Long orgid,
+			String userName) {
 
-		return userBranchAccessRepo.findGlobalParametersBranchByUserName(orgid, userName);
+		List<Object[]> result = userBranchAccessRepo.findGlobalParametersBranchByUserName(orgid, userName);
+
+		List<Map<String, Object>> responseList = new ArrayList<>();
+
+		for (Object[] row : result) {
+
+			Map<String, Object> map = new HashMap<>();
+
+			map.put("branchId", ((Number) row[0]).longValue());
+			map.put("branch", row[1]);
+			map.put("branchCode", row[2]);
+
+			responseList.add(map);
+		}
+
+		return responseList;
 	}
 
 //	@Override
@@ -869,7 +1116,7 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	private void getDesignationVOFromDesignationDTO(DesignationVO designationVO, DesignationDTO designationDTO) {
 		designationVO.setDesignation(designationDTO.getDesignation().toUpperCase());
 		designationVO.setActive(designationDTO.isActive());
-		designationVO.setCancel(designationDTO.isCancel());
+//		designationVO.setCancel(designationDTO.isCancel());
 		designationVO.setOrgId(designationDTO.getOrgId());
 
 	}
@@ -902,13 +1149,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 				throw new ApplicationException(errorMessage);
 			}
 
-			if (financialYearRepo.existsByFinYearIdentifierAndOrgId(financialYearDTO.getFinYearIdentifier(),
-					financialYearDTO.getOrgId())) {
-				String errorMessage = String.format("ThiS finyearidentifier:%s Already Exists This Organization .",
-						financialYearDTO.getFinYearIdentifier());
-				throw new ApplicationException(errorMessage);
-			}
-
 			if (financialYearRepo.existsByFinYearIdAndOrgId(financialYearDTO.getFinYearId(),
 					financialYearDTO.getOrgId())) {
 				String errorMessage = String.format("ThiS finyearid:%s Already Exists This Organization .",
@@ -934,17 +1174,6 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 					throw new ApplicationException(errorMessage);
 				}
 				financialYearVO.setFinYear(financialYearDTO.getFinYear());
-			}
-
-			if (!financialYearVO.getFinYearIdentifier().equals(financialYearDTO.getFinYearIdentifier())) {
-				if (financialYearRepo.existsByFinYearIdentifierAndOrgId(financialYearDTO.getFinYearIdentifier(),
-						financialYearDTO.getOrgId())) {
-					String errorMessage = String.format(
-							"This finyearIdentifier: %s already exists for this organization.",
-							financialYearDTO.getFinYearIdentifier());
-					throw new ApplicationException(errorMessage);
-				}
-				financialYearVO.setFinYearIdentifier(financialYearDTO.getFinYearIdentifier());
 			}
 
 			if (financialYearVO.getFinYearId() != financialYearDTO.getFinYearId()) {
@@ -974,11 +1203,11 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 			FinancialYearDTO financialYearDTO) {
 		financialYearVO.setFinYear(financialYearDTO.getFinYear());
 		financialYearVO.setFinYearId(financialYearDTO.getFinYearId());
-		financialYearVO.setFinYearIdentifier(financialYearDTO.getFinYearIdentifier());
+//		financialYearVO.setFinYearIdentifier(financialYearDTO.getFinYearIdentifier());
 		financialYearVO.setStartDate(financialYearDTO.getStartDate());
 		financialYearVO.setEndDate(financialYearDTO.getEndDate());
-		financialYearVO.setCurrentFinYear(financialYearDTO.isCurrentFinYear());
-		financialYearVO.setClosed(financialYearDTO.isClosed());
+//		financialYearVO.setCurrentFinYear(financialYearDTO.isCurrentFinYear());
+//		financialYearVO.setClosed(financialYearDTO.isClosed());
 		financialYearVO.setOrgId(financialYearDTO.getOrgId());
 		financialYearVO.setActive(financialYearDTO.isActive());
 	}
@@ -1011,10 +1240,9 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 						departmentDTO.getCode());
 				throw new ApplicationException(errorMessage);
 			}
-			if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
-					departmentDTO.getOrgId())) {
+			if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(), departmentDTO.getOrgId())) {
 				String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-						departmentDTO.getDepartmentName());
+						departmentDTO.getDepartment());
 				throw new ApplicationException(errorMessage);
 			}
 
@@ -1035,20 +1263,20 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 				}
 				departmentVO.setCode(departmentDTO.getCode());
 			}
-			if (!departmentVO.getDepartmentName().equalsIgnoreCase(departmentDTO.getDepartmentName())) {
-				if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+			if (!departmentVO.getDepartment().equalsIgnoreCase(departmentDTO.getDepartment())) {
+				if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 						departmentDTO.getOrgId())) {
 					String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-							departmentDTO.getDepartmentName());
+							departmentDTO.getDepartment());
 					throw new ApplicationException(errorMessage);
 				}
-				if (departmentRepo.existsByDepartmentNameAndOrgId(departmentDTO.getDepartmentName(),
+				if (departmentRepo.existsByDepartmentAndOrgId(departmentDTO.getDepartment(),
 						departmentDTO.getOrgId())) {
 					String errorMessage = String.format("ThiS DepartmentName:%s Already Exists This Organization .",
-							departmentDTO.getDepartmentName());
+							departmentDTO.getDepartment());
 					throw new ApplicationException(errorMessage);
 				}
-				departmentVO.setDepartmentName(departmentDTO.getDepartmentName());
+				departmentVO.setDepartment(departmentDTO.getDepartment());
 			}
 
 			departmentVO.setUpdatedBy(departmentDTO.getCreatedBy());
@@ -1065,11 +1293,11 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	}
 
 	private void getDepartmentVOFromDepartmentDTO(DepartmentVO departmentVO, DepartmentDTO departmentDTO) {
-		departmentVO.setDepartmentName(departmentDTO.getDepartmentName());
+		departmentVO.setDepartment(departmentDTO.getDepartment());
 		departmentVO.setCode(departmentDTO.getCode());
 		departmentVO.setActive(departmentDTO.isActive());
 		departmentVO.setOrgId(departmentDTO.getOrgId());
-		departmentVO.setCancel(departmentDTO.isCancel());
+//		departmentVO.setCancel(departmentDTO.isCancel());
 	}
 
 	@Override
@@ -1146,5 +1374,441 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 		return userProfileInformationRepo.getProfileInformationByUserId(id);
 	}
 
+	// Document Type
+	@Override
+	public Map<String, Object> createUpdateDocumentTypeMaster(DocumentTypeMasterDTO documentTypeMasterDTO)
+			throws ApplicationException {
+		DocumentTypeMasterVO documentTypeMasterVO = new DocumentTypeMasterVO();
+		String message;
+
+		if (ObjectUtils.isEmpty(documentTypeMasterDTO.getId())) {
+
+			if (documentTypeMasterRepo.existsByOrgIdAndScreenCode(documentTypeMasterDTO.getOrgId(),
+					documentTypeMasterDTO.getScreenCode())) {
+				throw new ApplicationException("ScreenCode already exist ");
+			}
+
+			if (documentTypeMasterRepo.existsByOrgIdAndDocCode(documentTypeMasterDTO.getOrgId(),
+					documentTypeMasterDTO.getDocCode())) {
+				throw new ApplicationException("Doc Code already exist ");
+			}
+
+			documentTypeMasterVO.setDocCode(documentTypeMasterDTO.getDocCode());
+			documentTypeMasterVO.setScreenCode(documentTypeMasterDTO.getScreenCode());
+			documentTypeMasterVO.setCreatedBy(documentTypeMasterDTO.getCreatedBy());
+			documentTypeMasterVO.setUpdatedBy(documentTypeMasterDTO.getCreatedBy());
+			mapDocumentTypeMasterDTOToVO(documentTypeMasterDTO, documentTypeMasterVO);
+			message = "Document Type Master Created successfully";
+
+		} else {
+			documentTypeMasterVO = documentTypeMasterRepo.findById(documentTypeMasterDTO.getId())
+					.orElseThrow(() -> new ApplicationException(
+							"Document Type Master not found for Id: " + documentTypeMasterDTO.getId()));
+
+			if (!documentTypeMasterVO.getScreenCode().equalsIgnoreCase(documentTypeMasterDTO.getScreenCode())) {
+				if (documentTypeMasterRepo.existsByOrgIdAndScreenCode(documentTypeMasterDTO.getOrgId(),
+						documentTypeMasterDTO.getScreenCode())) {
+					throw new ApplicationException("ScreenCode already exist ");
+				}
+				documentTypeMasterVO.setScreenCode(documentTypeMasterDTO.getScreenCode());
+			}
+
+			// Check DocCode uniqueness if changed
+			if (!documentTypeMasterVO.getDocCode().equalsIgnoreCase(documentTypeMasterDTO.getDocCode())) {
+				if (documentTypeMasterRepo.existsByOrgIdAndDocCode(documentTypeMasterDTO.getOrgId(),
+						documentTypeMasterDTO.getDocCode())) {
+					throw new ApplicationException("Doc Code already exist ");
+				}
+				documentTypeMasterVO.setDocCode(documentTypeMasterDTO.getDocCode());
+			}
+
+			documentTypeMasterVO.setUpdatedBy(documentTypeMasterDTO.getCreatedBy());
+			// Update the remaining fields from DTO to VO
+			mapDocumentTypeMasterDTOToVO(documentTypeMasterDTO, documentTypeMasterVO);
+			message = "Document Type Master Updated successfully";
+		}
+
+		documentTypeMasterRepo.save(documentTypeMasterVO);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("documentTypeMasterVO", documentTypeMasterVO);
+		response.put("message", message);
+		return response;
+	}
+
+	private void mapDocumentTypeMasterDTOToVO(DocumentTypeMasterDTO documentTypeMasterDTO,
+			DocumentTypeMasterVO documentTypeMasterVO) {
+		documentTypeMasterVO.setDescription(documentTypeMasterDTO.getDescription());
+		documentTypeMasterVO.setOrgId(documentTypeMasterDTO.getOrgId());
+		documentTypeMasterVO.setScreenName(documentTypeMasterDTO.getScreenName());
+
+		// Add any additional fields mapping here
+	}
+
+	@Override
+	public DocumentTypeMasterVO getDocumentTypeMasterById(Long id) throws ApplicationException {
+		if (ObjectUtils.isEmpty(id)) {
+			throw new ApplicationException("Invalid DocumentTypeMaster Id");
+		}
+		DocumentTypeMasterVO documentTypeMasterVO = documentTypeMasterRepo.findById(id)
+				.orElseThrow(() -> new ApplicationException("Document Type Master not found for Id: " + id));
+
+		return documentTypeMasterVO;
+	}
+
+	@Override
+	public List<DocumentTypeMasterVO> getAllDocumentTypeMasterByOrgId(Long orgId) {
+		return documentTypeMasterRepo.findAllByOrgId(orgId);
+	}
+
+	@Override
+	@Transactional
+	public Map<String, Object> updateCreateDocumentTypeMapping(DocumentTypeMappingDTO dto) throws ApplicationException {
+
+		Map<String, Object> response = new HashMap<>();
+		String message;
+
+		DocumentTypeMappingVO masterVO;
+
+		if (ObjectUtils.isEmpty(dto.getId())) {
+
+//				if (documentTypeMappingRepo.existsByBranch_IdAndFinancialYear_IdAndOrgId(dto.getBranch(),
+//						dto.getFinancialYear(), dto.getOrgId())) {
+			//
+//					throw new ApplicationException("Document Type Mapping already exists.");
+//				}
+
+			masterVO = new DocumentTypeMappingVO();
+			masterVO.setCreatedBy(dto.getCreatedBy());
+			masterVO.setUpdatedBy(dto.getCreatedBy());
+
+			message = "Document Type Mapping Created Successfully";
+
+		} else {
+
+			masterVO = documentTypeMappingRepo.findById(dto.getId())
+					.orElseThrow(() -> new ApplicationException("Document Type Mapping not found"));
+
+			List<DocumentTypeMappingDetailsVO> oldDetails = documentTypeMappingDetailsRepo
+					.findByDocumentTypeMappingMasterVO(masterVO);
+
+			documentTypeMappingDetailsRepo.deleteAll(oldDetails);
+
+			masterVO.setUpdatedBy(dto.getCreatedBy());
+
+			message = "Document Type Mapping Updated Successfully";
+		}
+
+		createUpdateDocumentTypeMappingVO(dto, masterVO);
+
+		documentTypeMappingRepo.save(masterVO);
+
+		DocumentTypeMappingResponseDTO responseDTO = convertToResponse(masterVO);
+
+		response.put("documentTypeMapping", responseDTO);
+		response.put("message", message);
+
+		return response;
+	}
+
+	private void createUpdateDocumentTypeMappingVO(DocumentTypeMappingDTO dto, DocumentTypeMappingVO masterVO)
+			throws ApplicationException {
+
+		BranchVO branchVO = branchRepo.findById(dto.getBranch())
+				.orElseThrow(() -> new ApplicationException("Branch not found with id : " + dto.getBranch()));
+
+		FinancialYearVO financialYearVO = financialYearRepo.findById(dto.getFinancialYear()).orElseThrow(
+				() -> new ApplicationException("Financial Year not found with id : " + dto.getFinancialYear()));
+
+		masterVO.setBranch(branchVO);
+		masterVO.setFinancialYear(financialYearVO);
+		masterVO.setOrgId(dto.getOrgId());
+		masterVO.setActive(dto.isActive());
+		masterVO.setCancelRemarks(dto.getCancelRemarks());
+		masterVO.setDescription(dto.getDescription());
+		masterVO.setBranchCode(dto.getBranchCode());
+		masterVO.setFinYearIdentifier(dto.getFinYearIdentifier());
+
+		List<DocumentTypeMappingDetailsVO> detailList = new ArrayList<>();
+
+		if (CollectionUtils.isNotEmpty(dto.getDetails())) {
+
+			for (DocumentTypeMappingDetailsDTO child : dto.getDetails()) {
+
+				DocumentTypeMappingDetailsVO detailVO = new DocumentTypeMappingDetailsVO();
+
+				detailVO.setScreenName(child.getScreenName());
+				detailVO.setScreenCode(child.getScreenCode());
+				detailVO.setDocCode(child.getDocCode());
+				detailVO.setPrefix(child.getPrefix());
+
+				detailVO.setBranch(child.getBranch());
+				detailVO.setBranchCode(child.getBranchCode());
+				detailVO.setFinYear(child.getFinYear());
+				detailVO.setFinYearIdentifier(child.getFinYearIdentifier());
+				detailVO.setConcatenation(child.getScreenCode() + child.getDocCode());
+				detailVO.setOrgId(dto.getOrgId());
+
+				detailVO.setDocumentTypeMappingMasterVO(masterVO);
+
+				detailList.add(detailVO);
+			}
+		}
+
+		masterVO.setDetails(detailList);
+	}
+
+	private DocumentTypeMappingResponseDTO convertToResponse(DocumentTypeMappingVO vo) {
+
+		DocumentTypeMappingResponseDTO dto = new DocumentTypeMappingResponseDTO();
+
+		dto.setId(vo.getId());
+		dto.setOrgId(vo.getOrgId());
+		dto.setCreatedBy(vo.getCreatedBy());
+		dto.setUpdatedBy(vo.getUpdatedBy());
+		dto.setCancelRemarks(vo.getCancelRemarks());
+		dto.setActive(vo.getActive());
+		dto.setDescription(vo.getDescription());
+
+		// Branch
+		if (vo.getBranch() != null) {
+
+			dto.setBranch(new DocumentTypeMappingBranchResponseDTO(vo.getBranch().getId(),
+					vo.getBranch().getBranchCode(), vo.getBranch().getBranch()));
+		}
+
+		// Financial Year
+		if (vo.getFinancialYear() != null) {
+
+			dto.setFinancialYear(
+					new FinancialYearResponseDTO(vo.getFinancialYear().getId(), vo.getFinancialYear().getFinYear(),
+							vo.getFinancialYear().getStartDate(), vo.getFinancialYear().getEndDate()));
+		}
+
+		// Child Details
+		List<DocumentTypeMappingDetailsResponseDTO> detailList = new ArrayList<>();
+
+		if (vo.getDetails() != null) {
+
+			for (DocumentTypeMappingDetailsVO detailVO : vo.getDetails()) {
+
+				DocumentTypeMappingDetailsResponseDTO detailDTO = new DocumentTypeMappingDetailsResponseDTO();
+
+				detailDTO.setId(detailVO.getId());
+				detailDTO.setScreenName(detailVO.getScreenName());
+				detailDTO.setScreenCode(detailVO.getScreenCode());
+				detailDTO.setDocCode(detailVO.getDocCode());
+				detailDTO.setPrefix(detailVO.getPrefix());
+				detailDTO.setLastNo(detailVO.getLastNo());
+
+				detailDTO.setBranch(detailVO.getBranch());
+				detailDTO.setBranchCode(detailVO.getBranchCode());
+				detailDTO.setFinYear(detailVO.getFinYear());
+				detailDTO.setFinYearIdentifier(detailVO.getFinYearIdentifier());
+				detailDTO.setConcatenation(detailVO.getConcatenation());
+				detailDTO.setOrgId(dto.getOrgId());
+
+				detailList.add(detailDTO);
+			}
+		}
+
+		dto.setDocumentTypeMappingDetails(detailList);
+
+		return dto;
+	}
+
+//		@Override
+//		public DocumentTypeMappingVO getDocumentTypeMappingById(Long id) throws ApplicationException {
+	//
+//			return documentTypeMappingRepo.findById(id)
+//					.orElseThrow(() -> new ApplicationException("Document Type Mapping not found with id : " + id));
+//		}
+	//
+//		@Override
+//		public List<DocumentTypeMappingVO> getDocumnentTypeMappingByOrgId(Long orgId, Long branch)
+//				throws ApplicationException {
+//			return documentTypeMappingRepo.findByOrgIdAndBranch(orgId, branch);
+	//
+//		}
+
+	@Override
+	public DocumentTypeMappingResponseDTO getDocumentTypeMappingById(Long id) throws ApplicationException {
+		DocumentTypeMappingVO documentTypeMappingVO = documentTypeMappingRepo.findById(id)
+				.orElseThrow(() -> new ApplicationException("Document Type Mapping not found with id : " + id));
+
+		return convertToResponse(documentTypeMappingVO);
+	}
+
+	@Override
+	public List<DocumentTypeMappingResponseDTO> getDocumentTypeMappingByOrgId(Long orgId, Long branch)
+			throws ApplicationException {
+
+		List<DocumentTypeMappingVO> documentTypeMappingList = documentTypeMappingRepo.findByOrgIdAndBranch(orgId,
+				branch);
+
+		if (documentTypeMappingList == null || documentTypeMappingList.isEmpty()) {
+			throw new ApplicationException(
+					"Document Type Mapping not found for OrgId: " + orgId + " and Branch: " + branch);
+		}
+
+		List<DocumentTypeMappingResponseDTO> responseList = new ArrayList<>();
+
+		for (DocumentTypeMappingVO documentTypeMappingVO : documentTypeMappingList) {
+			responseList.add(convertToResponse(documentTypeMappingVO));
+		}
+
+		return responseList;
+	}
+
+	@Override
+	public List<Map<String, Object>> getPendingDocumentTypeMapping(Long orgId, String branch, String branchCode,
+			String finYear, String finYearIdentifier) {
+		int finyear = Integer.parseInt(finYear.toString());
+		FinancialYearVO financialYearVO = financialYearRepo.findByOrgIdAndFinYear(orgId, finyear);
+		String finYearIden = financialYearVO.getFinYearId();
+		Set<Object[]> pendingDocTypeDetails = documentTypeMappingRepo.getPendingDoctypeMapping(orgId, branch,
+				branchCode, finYear, finYearIden);
+		return getPendingDocType(pendingDocTypeDetails);
+	}
+
+	private List<Map<String, Object>> getPendingDocType(Set<Object[]> pendingDocTypeDetails) {
+		List<Map<String, Object>> doctypeMappingDetails = new ArrayList<>();
+		for (Object[] sup : pendingDocTypeDetails) {
+			Map<String, Object> doctype = new HashMap<>();
+			doctype.put("screenName", sup[0] != null ? sup[0].toString() : "");
+			doctype.put("screenCode", sup[1] != null ? sup[1].toString() : "");
+			doctype.put("docCode", sup[2] != null ? sup[2].toString() : "");
+			doctype.put("finYear", sup[3] != null ? sup[3].toString() : "");
+			doctype.put("branch", sup[4] != null ? sup[4].toString() : "");
+			doctype.put("branchCode", sup[5] != null ? sup[5].toString() : "");
+			doctype.put("finYearIdentifier", sup[6] != null ? sup[6].toString() : "");
+			doctype.put("prefixField", sup[7] != null ? sup[7].toString() : "");
+			doctypeMappingDetails.add(doctype);
+		}
+
+		return doctypeMappingDetails;
+	}
+	
+	
+	 @Override
+	    public List<ModeMasterVO> getModeMasterByOrgId(Long orgId) {
+	        return modeMasterRepo.findModeMasterByOrgId(orgId);
+	    }
+
+	    @Override
+	    public Optional<ModeMasterVO> getModeMasterById(Long id) {
+	        return modeMasterRepo.findById(id);
+	    }
+
+	    @Override
+	    public Map<String, Object> createUpdateModeMaster(
+	            ModeMasterDTO modeMasterDTO) throws ApplicationException {
+
+	        ModeMasterVO modeMasterVO;
+	        String message;
+
+	        if (ObjectUtils.isEmpty(modeMasterDTO.getId())) {
+
+	            if (modeMasterRepo.existsByModeCodeAndOrgId(
+	                    modeMasterDTO.getModeCode(), modeMasterDTO.getOrgId())) {
+
+	                String errorMessage = String.format(
+	                        "The ModeCode: %s already exists in this Organization.",
+	                        modeMasterDTO.getModeCode());
+
+	                throw new ApplicationException(errorMessage);
+	            }
+
+	            if (modeMasterRepo.existsByModeNameAndOrgId(
+	                    modeMasterDTO.getModeName(), modeMasterDTO.getOrgId())) {
+
+	                String errorMessage = String.format(
+	                        "The ModeName: %s already exists in this Organization.",
+	                        modeMasterDTO.getModeName());
+
+	                throw new ApplicationException(errorMessage);
+	            }
+
+	            // Create new mode master
+	            modeMasterVO = new ModeMasterVO();
+	            modeMasterVO.setCreatedBy(modeMasterDTO.getCreatedBy());
+	            modeMasterVO.setUpdatedBy(modeMasterDTO.getCreatedBy());
+
+	            message = "Mode Master Created Successfully";
+
+	        } else {
+
+	            // Update existing mode master
+	            modeMasterVO = modeMasterRepo.findById(modeMasterDTO.getId())
+	                    .orElseThrow(() -> new ApplicationException(
+	                            "Mode Master not found with id: "
+	                                    + modeMasterDTO.getId()));
+
+	            modeMasterVO.setUpdatedBy(modeMasterDTO.getCreatedBy());
+
+	            if (!modeMasterVO.getModeCode()
+	                    .equalsIgnoreCase(modeMasterDTO.getModeCode())) {
+
+	                if (modeMasterRepo.existsByModeCodeAndOrgId(
+	                        modeMasterDTO.getModeCode(),
+	                        modeMasterDTO.getOrgId())) {
+
+	                    String errorMessage = String.format(
+	                            "The ModeCode: %s already exists in this Organization.",
+	                            modeMasterDTO.getModeCode());
+
+	                    throw new ApplicationException(errorMessage);
+	                }
+
+	                modeMasterVO.setModeCode(
+	                        modeMasterDTO.getModeCode().toUpperCase());
+	            }
+
+	            if (!modeMasterVO.getModeName()
+	                    .equalsIgnoreCase(modeMasterDTO.getModeName())) {
+
+	                if (modeMasterRepo.existsByModeNameAndOrgId(
+	                        modeMasterDTO.getModeName(),
+	                        modeMasterDTO.getOrgId())) {
+
+	                    String errorMessage = String.format(
+	                            "The ModeName: %s already exists in this Organization.",
+	                            modeMasterDTO.getModeName());
+
+	                    throw new ApplicationException(errorMessage);
+	                }
+
+	                modeMasterVO.setModeName(
+	                        modeMasterDTO.getModeName().toUpperCase());
+	            }
+
+	            message = "Mode Master Updated Successfully";
+	        }
+
+	        getModeMasterVOFromModeMasterDTO(modeMasterVO, modeMasterDTO);
+
+	        modeMasterRepo.save(modeMasterVO);
+
+	        Map<String, Object> response = new HashMap<String, Object>();
+	        response.put("message", message);
+	        response.put("createdModeMasterVO", modeMasterVO);
+
+	        return response;
+	    }
+
+	    private void getModeMasterVOFromModeMasterDTO(
+	            ModeMasterVO modeMasterVO, ModeMasterDTO modeMasterDTO) {
+
+	        modeMasterVO.setModeCode(
+	                modeMasterDTO.getModeCode().toUpperCase());
+
+	        modeMasterVO.setModeName(
+	                modeMasterDTO.getModeName().toUpperCase());
+
+	        modeMasterVO.setDescription(modeMasterDTO.getDescription());
+	        modeMasterVO.setOrgId(modeMasterDTO.getOrgId());
+	        modeMasterVO.setCancelRemarks(modeMasterDTO.getCancelRemarks());
+	    }
+	    
 
 }

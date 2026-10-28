@@ -431,32 +431,50 @@ public class AuthController extends BaseController {
 	}
 	
 	@GetMapping("/allUsersByOrgId")
-	public ResponseEntity<ResponseDTO> getAllUsersByOrgId(@RequestParam Long orgId) {
-		String methodName = "getAllUsersByOrgId()";
-		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
-		String errorMsg = null;
-		Map<String, Object> responseObjectsMap = new HashMap<>();
-		ResponseDTO responseDTO = null;
-		List<UserVO> userVO = new ArrayList<>();
-		try {
-			userVO = authService.getAllUsersByOrgId(orgId);
-		} catch (Exception e) {
-			errorMsg = e.getMessage();
-			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
-		}
-		if (StringUtils.isBlank(errorMsg)) {
-			responseObjectsMap.put(CommonConstant.STRING_MESSAGE,
-					"Users information get successfully");
-			responseObjectsMap.put("userVO", userVO);
-			responseDTO = createServiceResponse(responseObjectsMap);
-		} else {
-			responseDTO = createServiceResponseError(responseObjectsMap,
-					"Users information receive failed", errorMsg);
-		}
-		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
-		return ResponseEntity.ok().body(responseDTO);
+	public ResponseEntity<ResponseDTO> getAllUsersByOrgId(
+	        @RequestParam Long orgId) {
+
+	    String methodName = "getAllUsersByOrgId()";
+
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+	    try {
+
+	        List<UserVO> userVO = authService.getAllUsersByOrgId(orgId);
+
+	        responseObjectsMap.put(
+	                CommonConstant.STRING_MESSAGE,
+	                "Users information retrieved successfully");
+
+	        responseObjectsMap.put("userVO", userVO);
+
+	        ResponseDTO responseDTO =
+	                createServiceResponse(responseObjectsMap);
+
+	        return ResponseEntity.ok(responseDTO);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error(
+	                "Error in {}: ",
+	                methodName,
+	                e);
+
+	        ResponseDTO responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Users information retrieval failed",
+	                e.getMessage());
+
+	        return ResponseEntity.status(
+	                org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(responseDTO);
+
+	    } finally {
+	        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+	    }
 	}
-	
 	@GetMapping("/getUserById")
 	public ResponseEntity<ResponseDTO> getUserById(@RequestParam Long userId) {
 		String methodName = "getUserById()";

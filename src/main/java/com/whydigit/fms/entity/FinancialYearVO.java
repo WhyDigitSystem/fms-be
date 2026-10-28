@@ -19,46 +19,57 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="financialyear")
+@Table(name = "financialyear")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class FinancialYearVO {
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "financialyearegen")
-	@SequenceGenerator(name = "financialyearegen", sequenceName = "financialyearseq", initialValue = 1000000001, allocationSize = 1)
-	@Column(name = "finyearid")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "financialyeargen")
+	@SequenceGenerator(name = "financialyeargen", sequenceName = "financialyearseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "financialyear_id")
 	private Long id;
-	@Column(name ="financialyearid")
-	private Long finYearId;
-	@Column(name="finyear")
+	@Column(name = "financial_year")
 	private int finYear;
-	@Column(name="finyearidentifier",length =10)
-	private String finYearIdentifier;
-	@Column(name="startdate")
+	@Column(name = "fin_year_id")
+	private String finYearId;
+	@Column(name = "start_date")
 	private LocalDate startDate;
-	@Column(name="enddate")
+	@Column(name = "end_date")
 	private LocalDate endDate;
-	@Column(name="currentfinyear")
+	@Column(name = "current_financialyear")
 	private boolean currentFinYear;
-	@Column(name="closed")
+	@Column(name = "closed")
 	private boolean closed;
-	@Column(name="orgid")
+	@Column(name = "orgid")
 	private Long orgId;
-	@Column(name="createdby",length =25)
+	@Column(name = "createdby")
 	private String createdBy;
-	@Column(name="modifiedby",length =25)
+	@Column(name = "modifiedby")
 	private String updatedBy;
 	private boolean active;
 	
+	@Column(name = "cancel_Remarks")
+	private String cancelRemarks;
+
 	@JsonGetter("active")
-	public String getActive() {
-		return active ? "Active" : "In-Active";
-	}
-	
-	
+    public String getActive() {
+        return active ? "Active" : "In-Active";  // If 'active' is true, return "Active", otherwise "In-Active"
+    }
+
+    @JsonGetter("closed")
+    public String getClosed() {
+        return closed ? "Yes" : "No";  // If 'cancel' is true, return "Yes", otherwise "No"
+    }
+
+    @JsonGetter("currentFinYear")
+    public String getCurrentFinYear() {
+        return currentFinYear ? "Yes" : "No";  // If 'currentFinYear' is true, return "Yes", otherwise "No"
+    }
+
 	@Embedded
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
-
+	
 }
+

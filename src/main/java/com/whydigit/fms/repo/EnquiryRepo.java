@@ -12,12 +12,13 @@ import com.whydigit.fms.entity.EnquiryVO;
 @Repository
 public interface EnquiryRepo extends JpaRepository<EnquiryVO, Long>{
 
-	@Query(nativeQuery = true, value = "select concat(prefix,lpad(last_no,5,0)) AS docid from documenttypemapping_details where org_id=?1 and  screen_code=?2")
+	 @Query(nativeQuery = true, value = "select concat(prefix,lpad(last_no,5,0)) AS docid from documenttypemapping_details where org_id=?1  and  screen_code=?2")
 	String getEnquiryDocId(Long orgId, String screenCode);
 
-	@Query("SELECT e FROM EnquiryVO e WHERE e.orgId = :orgId AND e.branch = :branch")
-	List<EnquiryVO> findByOrgIdAndBranch(
-	        @Param("orgId") Long orgId,
-	        @Param("branch") String branch);
+	 @Query(value = "SELECT * FROM enquiry WHERE org_id = :orgId AND branch = :branch",
+		       nativeQuery = true)
+		List<EnquiryVO> findByOrgIdAndBranch(
+		        @Param("orgId") Long orgId,
+		        @Param("branch") Long branch);
 
 }

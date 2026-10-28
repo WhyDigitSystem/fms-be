@@ -1,5 +1,6 @@
 package com.whydigit.fms.dto;
 
+
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -10,17 +11,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FinancialYearDTO {
-	
+
 	private Long id;
 	private int finYear;
-	private Long finYearId;
-	private String finYearIdentifier;
 	private LocalDate startDate;
 	private LocalDate endDate;
-	private boolean currentFinYear;
-	private boolean closed;
 	private Long orgId;
 	private String createdBy;
 	private boolean active;
+	private String finYearId;
+	
+	private String cancelRemarks;
 
 }
+
+

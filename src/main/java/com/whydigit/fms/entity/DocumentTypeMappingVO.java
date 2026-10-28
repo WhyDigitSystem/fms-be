@@ -9,10 +9,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.whydigit.fms.dto.CreatedUpdatedDate;
 
@@ -21,44 +24,68 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="m_documenttypemapping")
+@Table(name = "document_type_mapping")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+
 public class DocumentTypeMappingVO {
-	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "m_documenttypemappinggen")
-	@SequenceGenerator(name = "m_documenttypemappinggen", sequenceName = "m_documenttypemappingseq", initialValue = 1000000001, allocationSize = 1)
-	@Column(name = "m_documenttypemappingid")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "document_type_mappinggen")
+	@SequenceGenerator(name = "document_type_mappinggen", sequenceName = "document_type_mappingseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "document_type_mapping_id")
 	private Long id;
+
+	@ManyToOne
+	@JoinColumn(name = "branch")
+	private BranchVO branch;
+
+	@ManyToOne
+	@JoinColumn(name = "financial_year")
+	private FinancialYearVO financialYear;
+
+	@Column(name = "description")
+	private String description;
+	@Column(name = "org_id")
+	private Long orgId;
+	@Column(name = "active")
+	private boolean active;
+	@Column(name = "created_by")
+	private String createdBy;
+	@Column(name = "modified_by")
+	private String updatedBy;
+	@Column(name = "cancel")
+	private boolean cancel = false;
+	@Column(name = "cancel_remarks")
+	private String cancelRemarks;
+	@Column(name = "screen_name")
+	private String screenName = "DT";
+	@Column(name = "screen_code")
+	private String screenCode = "DOCUMENTTYPE";
 	
-	@Column(name = "branch",length =25)
-	private String branch;
-	
-	@Column(name = "branchcode",length =25)
+	@Column(name = "branch_code",length =25)
 	private String branchCode;
 	
-	@Column(name = "finyear",length =10)
-	private String finYear;
 	
-	@Column(name = "finyearidentifier",length =10)
+	
+	@Column(name = "finyearidentifier",length =50)
 	private String finYearIdentifier;
 	
-	@Column(name = "orgid")
-	private Long orgId;
-	
-	@Column(name="createdby",length =25)
-	private String createdBy;
-	
-	@Column(name="modifiedby",length =25)
-	private String updatedBy;
-	
-	@JsonManagedReference
-	@OneToMany(mappedBy = "documentTypeMappingVO", cascade = CascadeType.ALL)
-	private List<DocumentTypeMappingDetailsVO>documentTypeMappingDetailsVO;
-	
+	@JsonGetter("active")
+	public String getActive() {
+		return active ? "Active" : "In-Active";
+	}
+
+	@JsonGetter("cancel")
+	public String getCancel() {
+		return cancel ? "T" : "F";
+	}
+
 	@Embedded
 	private CreatedUpdatedDate commonDate = new CreatedUpdatedDate();
+
+	@OneToMany(mappedBy = "documentTypeMappingMasterVO", cascade = CascadeType.ALL)
+	@JsonManagedReference
+	private List<DocumentTypeMappingDetailsVO> details;
 
 }

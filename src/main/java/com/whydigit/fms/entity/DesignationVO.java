@@ -29,10 +29,12 @@ public class DesignationVO {
 	private Long id;
 	@Column(name = "designation",length =25)
 	private String designation;
+	@Column(name = "code",length =25)
+	private String code;
 	@Column(name="orgid")
     private Long orgId;
 	private boolean active;
-	private boolean cancel;
+	private boolean cancel=false;
 	
 	@Column(name="createdby",length =25)
 	private String createdBy;

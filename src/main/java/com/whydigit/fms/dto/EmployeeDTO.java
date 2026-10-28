@@ -13,10 +13,9 @@ public class EmployeeDTO {
 	private String employeeCode;
 	private String employeeName;
 	private String gender;
-	private String branch;
-	private String branchCode;
-	private String department;
-	private String designation;
+	private Long branch;
+	private Long department;
+	private Long designation;
 	private String dateOfBirth;
 	private String joiningdate;
 	private String createdBy;

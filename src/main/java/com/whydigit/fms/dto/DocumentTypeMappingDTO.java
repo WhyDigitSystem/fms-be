@@ -3,28 +3,32 @@ package com.whydigit.fms.dto;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+
 public class DocumentTypeMappingDTO {
-	
-	
-	private String branch;
-	
-	private String branchCode;
-	
-	private String finYear;
-	
-	private String finYearIdentifier;
-	
+
+	private Long id;
+	private Long branch;
+	private Long financialYear;
 	private Long orgId;
-	
 	private String createdBy;
-	
-	private List<DocumentTypeMappingDetailsDTO> documentTypeMappingDetailsDTO;
-	
+	private String cancelRemarks;
+	private String description;
+	private boolean active;
+	private String branchCode;
+
+	private String finYear;
+
+	private String finYearIdentifier;
+
+	private List<DocumentTypeMappingDetailsDTO> details;
 
 }

@@ -13,12 +13,11 @@ private Long id;
 	
 	private String stateCode;
 	private String stateName;
-    private String country;
+    private Long country;
     private String region;
     private String stateNumber;
     private boolean active;
     private String createdBy;
 	private Long orgId;
-	private boolean cancel;
 
 }
