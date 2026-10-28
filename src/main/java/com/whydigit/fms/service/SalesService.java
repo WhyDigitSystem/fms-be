@@ -1,9 +1,14 @@
 package com.whydigit.fms.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.whydigit.fms.ResponseDTO.BookingResponseDTO;
 import com.whydigit.fms.ResponseDTO.EnquiryResponseDTO;
@@ -30,7 +35,7 @@ public interface SalesService {
 
 	List<QuotationResponseDTO> getQuotationByOrgIdAndBranch(Long orgId, Long branch) throws ApplicationException;
 
-	Map<String, Object> createUpdateBooking(BookingDTO bookingDTO) throws ApplicationException;
+	Map<String, Object> createUpdateBooking(BookingDTO bookingDTO, MultipartFile[] files) throws ApplicationException;
 
 	BookingResponseDTO getBookingById(Long id) throws ApplicationException;
 
@@ -39,6 +44,8 @@ public interface SalesService {
 	String getBookingDocId(Long orgId) throws ApplicationException;
 
 	String getQuotationDocId(Long orgId) throws ApplicationException;
+
+	ResponseEntity<byte[]> viewBookingFile(HttpServletRequest request) throws IOException;
 
 
 }

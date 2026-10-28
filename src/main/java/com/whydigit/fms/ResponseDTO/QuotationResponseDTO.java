@@ -20,14 +20,17 @@ public class QuotationResponseDTO {
     private LocalDate docDate;
     private LocalDate expirationDate;
 
+    private String enquiryNo;
+    private LocalDate enquiryDate;
+    
     private String companyName;
     private String agentName;
 
-    private String originCode;
-    private String originCity;
+    private CityResponseDetailsDTO originCity;
+    private CityResponseDetailsDTO destinationCity;
 
-    private String destinationCode;
-    private String destinationCity;
+    private PortResponseDetailsDTO originPort;
+    private PortResponseDetailsDTO destinationPort;
 
     private String paymentTerms;
     private String incoterm;

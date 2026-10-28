@@ -58,7 +58,7 @@ public class BookingRoutingVO {
     @Column(name = "incoterm")
     private String incoterm;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "booking_id")
     private BookingVO bookingVO;
 

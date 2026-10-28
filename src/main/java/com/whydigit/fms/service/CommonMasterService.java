@@ -23,6 +23,7 @@ import com.whydigit.fms.dto.DocumentTypeMappingDTO;
 import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
 import com.whydigit.fms.dto.GlobalParameterDTO;
+import com.whydigit.fms.dto.ModeMasterDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
 import com.whydigit.fms.dto.UserProfileInformationDTO;
@@ -34,6 +35,7 @@ import com.whydigit.fms.entity.DesignationVO;
 import com.whydigit.fms.entity.DocumentTypeMasterVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
+import com.whydigit.fms.entity.ModeMasterVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
 import com.whydigit.fms.entity.UserProfileInformationVO;
 import com.whydigit.fms.exception.ApplicationException;
@@ -175,7 +177,12 @@ public interface CommonMasterService {
 	List<Map<String, Object>> getPendingDocumentTypeMapping(Long orgId, String branch, String branchCode,
 			String finYear, String finYearIdentifier);
 
+	Map<String, Object> createUpdateModeMaster(ModeMasterDTO modeMasterDTO)
+            throws Exception;
 
+    Optional<ModeMasterVO> getModeMasterById(Long id) throws Exception;
+
+    List<ModeMasterVO> getModeMasterByOrgId(Long orgId) throws Exception;
 
 
 

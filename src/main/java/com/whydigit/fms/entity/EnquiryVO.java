@@ -42,8 +42,8 @@ public class EnquiryVO {
     @Column(name = "doc_date")
     private LocalDate docDate = LocalDate.now();
 
-    @Column(name = "customer")
-    private String customer;
+    @Column(name = "company")
+    private String company;
 
     @Column(name = "movement")
     private String movement; // Import / Export
@@ -52,34 +52,46 @@ public class EnquiryVO {
     @Column(name = "shipment_mode")
     private String shipmentMode; // Sea / Air / Road
 
-    // Shipment Route
-    @Column(name = "from_location")
-    private String fromLocation;
+ // Shipment Route
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_location")
+    private CityVO fromLocation;
 
-    @Column(name = "to_location")
-    private String toLocation;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_location")
+    private CityVO toLocation;
 
-    // Sea shipment
-    @Column(name = "origin_port")
-    private String originPort;
 
-    @Column(name = "destination_port")
-    private String destinationPort;
+    // Sea Shipment
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origin_port")
+    private PortVO originPort;
 
-    // Air shipment
-    @Column(name = "origin_airport")
-    private String originAirport;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_port")
+    private PortVO destinationPort;
 
-    @Column(name = "destination_airport")
-    private String destinationAirport;
 
-    // Road shipment
-    @Column(name = "origin_terminal")
-    private String originTerminal;
+    // Air Shipment
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origin_airport")
+    private PortVO originAirport;
 
-    @Column(name = "destination_terminal")
-    private String destinationTerminal;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_airport")
+    private PortVO destinationAirport;
 
+
+    // Road Shipment
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origin_terminal")
+    private PortVO originTerminal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_terminal")
+    private PortVO destinationTerminal;
+    
+    
     // Cargo Details
     @Column(name = "cargo_description")
     private String cargoDescription;

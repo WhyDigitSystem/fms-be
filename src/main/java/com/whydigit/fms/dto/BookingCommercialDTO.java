@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookingCommercialDTO {
 
-    private Long id;
+//    private Long id;
 
     // Commercial Information
     private String freightPaymentTerms;

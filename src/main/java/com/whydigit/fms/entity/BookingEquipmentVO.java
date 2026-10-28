@@ -29,13 +29,14 @@ import lombok.Setter;
 public class BookingEquipmentVO {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_equipment_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_equipmentgen")
     @SequenceGenerator(
-            name = "booking_equipment_seq",
-            sequenceName = "booking_equipment_seq",
+            name = "booking_equipmentgen",
+            sequenceName = "booking_equipmentseq", initialValue = 1000000001,
             allocationSize = 1
     )
-    @Column(name = "id")
+
+    @Column(name = "booking_equipment_id")
     private Long id;
 
 
@@ -85,7 +86,7 @@ public class BookingEquipmentVO {
     private String remarks;
     
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "booking_id", nullable = false)
     @JsonBackReference
     private BookingVO bookingVO;

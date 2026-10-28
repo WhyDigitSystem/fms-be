@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.whydigit.fms.ResponseDTO.BranchResponsesDTO;
+import com.whydigit.fms.ResponseDTO.CityResponseDetailsDTO;
 import com.whydigit.fms.ResponseDTO.ConfigModeResponsesDTO;
 import com.whydigit.fms.ResponseDTO.ConfigProductResponsesDTO;
 import com.whydigit.fms.ResponseDTO.ConfigResponseDTO;
@@ -28,6 +29,7 @@ import com.whydigit.fms.dto.PortDTO;
 import com.whydigit.fms.dto.ProductDTO;
 import com.whydigit.fms.dto.ServiceDTO;
 import com.whydigit.fms.entity.BranchVO;
+import com.whydigit.fms.entity.CityVO;
 import com.whydigit.fms.entity.ConfigModeVO;
 import com.whydigit.fms.entity.ConfigProductVO;
 import com.whydigit.fms.entity.ConfigServiceVO;
@@ -37,6 +39,7 @@ import com.whydigit.fms.entity.PortVO;
 import com.whydigit.fms.entity.ProductVO;
 import com.whydigit.fms.entity.ServiceVO;
 import com.whydigit.fms.repo.BranchRepo;
+import com.whydigit.fms.repo.CityRepo;
 import com.whydigit.fms.repo.ConfigModeRepo;
 import com.whydigit.fms.repo.ConfigProductRepo;
 import com.whydigit.fms.repo.ConfigRepo;
@@ -77,6 +80,9 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 	@Autowired
 	private ConfigServiceRepo configServiceRepository;
+	
+	@Autowired
+	CityRepo cityRepo;
 
 	// PRODUCT - CREATE / UPDATE
 
@@ -416,6 +422,11 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 				.orElseThrow(() -> new RuntimeException("Country not found with id: " + portDTO.getCountry()));
 
 		portVO.setCountry(countryVO);
+		
+		CityVO cityVO = cityRepo.findById(portDTO.getCity())
+				.orElseThrow(() -> new RuntimeException("City not found with id: " + portDTO.getCountry()));
+
+		portVO.setCity(cityVO);
 
 		portVO.setActive(portDTO.isActive());
 
@@ -465,6 +476,17 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 			response.setCountry(countryResponse);
 		}
+		
+		if (portVO.getCity() != null) {
+		    CityResponseDetailsDTO cityResponse = new CityResponseDetailsDTO();
+
+		    cityResponse.setId(portVO.getCity().getId());
+		    cityResponse.setCity(portVO.getCity().getCityName());
+		    cityResponse.setCityCode(portVO.getCity().getCityCode());
+
+		    response.setCity(cityResponse);
+		}
+
 
 		response.setActive(portVO.getActive());
 
@@ -509,80 +531,102 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 	// CREATE OR UPDATE CONFIGURATION
 	// =========================================================
 
-	@Override
-	@Transactional
-	public Map<String, Object> createUpdateConfig(ConfigDTO dto) {
+	 // CREATE OR UPDATE CONFIGURATION
+		@Override
+		@Transactional
+		public Map<String, Object> createUpdateConfig(ConfigDTO dto) {
 
-		Map<String, Object> response = new HashMap<>();
+			Map<String, Object> response = new HashMap<>();
 
-		String message;
-		ConfigVO configVO;
+			String message;
+			ConfigVO configVO;
+			String screenCode = "CONFIG";
+		
+			// COMPANY NAME VALIDATION BASED ON ORG ID
 
-		// =====================================================
-		// CREATE
-		// =====================================================
+			if (dto.getOrgId() == null) {
+			    throw new RuntimeException("Organization ID is required");
+			}
 
-		if (dto.getId() == null) {
+			if (dto.getCompany() == null || dto.getCompany().trim().isEmpty()) {
+			    throw new RuntimeException("Company name is required");
+			}
 
-			configVO = new ConfigVO();
+			String company = dto.getCompany().trim();
 
-			configVO.setCreatedBy(dto.getCreatedBy());
-			configVO.setUpdatedBy(dto.getCreatedBy());
+			if (dto.getId() == null) {
 
-			message = "Configuration Created Successfully";
+			    // CREATE: Check duplicate company within the same organization
+			    if (configRepository.existsByOrgIdAndCompanyIgnoreCase(
+			            dto.getOrgId(), company)) {
 
-		} else {
+			        throw new RuntimeException(
+			                "Company '" + company
+			                + "' already exists for organization ID: " + dto.getOrgId());
+			    }
 
-			// =====================================================
-			// UPDATE
-			// =====================================================
+			} else {
 
-			configVO = configRepository.findById(dto.getId())
-					.orElseThrow(() -> new RuntimeException("Configuration Not Found with id: " + dto.getId()));
+			    // UPDATE: Exclude the current configuration from the duplicate check
+			    if (configRepository.existsByOrgIdAndCompanyIgnoreCaseAndIdNot(
+			            dto.getOrgId(), company, dto.getId())) {
 
-			// Delete old configuration modes.
-			List<ConfigModeVO> oldModes = configModeRepository.findByConfig(configVO);
+			        throw new RuntimeException(
+			                "Company '" + company
+			                + "' already exists for organization ID: " + dto.getOrgId());
+			    }
+			}
+		
 
-			configModeRepository.deleteAll(oldModes);
+			// CREATE
+			if (dto.getId() == null) {
 
-			// Delete old configuration products.
-			List<ConfigProductVO> oldProducts = configProductRepository.findByConfig(configVO);
+				configVO = new ConfigVO();
 
-			configProductRepository.deleteAll(oldProducts);
+				configVO.setCreatedBy(dto.getCreatedBy());
+				configVO.setUpdatedBy(dto.getCreatedBy());
 
-			// Delete old configuration services.
-			List<ConfigServiceVO> oldServices = configServiceRepository.findByConfig(configVO);
+				message = "Configuration Created Successfully";
 
-			configServiceRepository.deleteAll(oldServices);
+			} else {
 
-			configVO.setUpdatedBy(dto.getCreatedBy());
+				// UPDATE
 
-			message = "Configuration Updated Successfully";
+				configVO = configRepository.findById(dto.getId())
+						.orElseThrow(() -> new RuntimeException("Configuration Not Found with id: " + dto.getId()));
+
+				List<ConfigModeVO> oldModes = configModeRepository.findByConfig(configVO);
+
+				configModeRepository.deleteAll(oldModes);
+
+				List<ConfigProductVO> oldProducts = configProductRepository.findByConfig(configVO);
+
+				configProductRepository.deleteAll(oldProducts);
+
+				List<ConfigServiceVO> oldServices = configServiceRepository.findByConfig(configVO);
+
+				configServiceRepository.deleteAll(oldServices);
+
+				configVO.setUpdatedBy(dto.getCreatedBy());
+
+				message = "Configuration Updated Successfully";
+			}
+
+			// HEADER + CHILD MAPPING
+			getConfigVOFromDTO(dto, configVO);
+
+
+			configVO = configRepository.saveAndFlush(configVO);
+
+			ConfigResponseDTO responseDTO = convertConfigToResponseDTO(configVO);
+
+			response.put("message", message);
+			response.put("configResponseVO", responseDTO);
+
+			return response;
 		}
 
-		// =====================================================
-		// HEADER + CHILD MAPPING
-		// =====================================================
 
-		getConfigVOFromDTO(dto, configVO);
-
-		// =====================================================
-		// SAVE HEADER
-		// =====================================================
-
-		configVO = configRepository.saveAndFlush(configVO);
-
-		// =====================================================
-		// RESPONSE
-		// =====================================================
-
-		ConfigResponseDTO responseDTO = convertConfigToResponseDTO(configVO);
-
-		response.put("message", message);
-		response.put("configResponseVO", responseDTO);
-
-		return response;
-	}
 
 	// =========================================================
 	// CONFIGURATION - HEADER + CHILD MAPPING

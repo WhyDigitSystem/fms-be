@@ -29,8 +29,8 @@ public class BookingResponseDTO {
     private Long orgId;
     private BranchResponseDTO branch;
 
-    private boolean active;
-    private boolean cancel;
+    private String active;
+    private String cancel;
 
     private String cancelRemarks;
     private String remarks;

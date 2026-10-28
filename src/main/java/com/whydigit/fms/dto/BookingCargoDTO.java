@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookingCargoDTO {
 
-    private Long id;
+//    private Long id;
 
     private String commodityDescription;
 

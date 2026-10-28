@@ -20,6 +20,8 @@ public class PortDTO
 
     private Long country;
 
+	private Long city;
+
     private Long orgId;
 
     private Long branch;

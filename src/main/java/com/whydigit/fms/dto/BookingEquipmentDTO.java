@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookingEquipmentDTO {
 
-    private Long id;
+//    private Long id;
 
     private String equipmentType;
 

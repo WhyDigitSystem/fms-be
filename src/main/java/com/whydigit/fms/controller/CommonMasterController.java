@@ -39,6 +39,7 @@ import com.whydigit.fms.dto.DocumentTypeMappingDTO;
 import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
 import com.whydigit.fms.dto.GlobalParameterDTO;
+import com.whydigit.fms.dto.ModeMasterDTO;
 import com.whydigit.fms.dto.ResponseDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
@@ -1450,5 +1451,100 @@ public class CommonMasterController extends BaseController {
 			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
 			return ResponseEntity.ok().body(responseDTO);
 		}
+		
+		
+		@PutMapping("/createUpdateModeMaster")
+		public ResponseEntity<ResponseDTO> createUpdateModeMaster(
+		        @RequestBody ModeMasterDTO modeMasterDTO) {
+
+		    String methodName = "createUpdateModeMaster()";
+
+		    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		    try {
+
+		        Map<String, Object> createdModeMasterVO =
+		                commonMasterService.createUpdateModeMaster(modeMasterDTO);
+
+		        responseObjectsMap.put(
+		                CommonConstant.STRING_MESSAGE,
+		                createdModeMasterVO.get("message"));
+
+		        responseObjectsMap.put(
+		                "modeMasterVO",
+		                createdModeMasterVO.get("createdModeMasterVO"));
+
+		        ResponseDTO responseDTO = createServiceResponse(responseObjectsMap);
+
+		        return ResponseEntity.ok(responseDTO);
+
+		    } catch (Exception e) {
+
+		        ResponseDTO responseDTO = createServiceResponseError(
+		                responseObjectsMap,
+		                "Mode Master creation/update failed",
+		                e.getMessage());
+
+		        return ResponseEntity.badRequest().body(responseDTO);
+		    }
+		}
+		
+		
+		@GetMapping("/getModeMasterById")
+		public ResponseEntity<ResponseDTO> getModeMasterById(
+		        @RequestParam Long id) {
+
+		    String methodName = "getModeMasterById()";
+		    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		    try {
+		        responseObjectsMap.put(CommonConstant.STRING_MESSAGE,
+		                "Mode Master information retrieved successfully");
+
+		        responseObjectsMap.put("modeMasterVO",
+		                commonMasterService.getModeMasterById(id));
+
+		        ResponseDTO responseDTO = createServiceResponse(responseObjectsMap);
+
+		        return ResponseEntity.ok(responseDTO);
+
+		    } catch (Exception e) {
+		        ResponseDTO responseDTO = createServiceResponseError(
+		                responseObjectsMap,
+		                "Mode Master information retrieval failed",
+		                e.getMessage());
+
+		        return ResponseEntity.badRequest().body(responseDTO);
+		    }
+		}
+
+		@GetMapping("/getModeMasterByOrgId")
+		public ResponseEntity<ResponseDTO> getModeMasterByOrgId(
+		        @RequestParam Long orgId) {
+
+		    String methodName = "getModeMasterByOrgId()";
+		    Map<String, Object> responseObjectsMap = new HashMap<>();
+
+		    try {
+		        responseObjectsMap.put(CommonConstant.STRING_MESSAGE,
+		                "Mode Master information retrieved successfully");
+
+		        responseObjectsMap.put("modeMasterVO",
+		                commonMasterService.getModeMasterByOrgId(orgId));
+
+		        ResponseDTO responseDTO = createServiceResponse(responseObjectsMap);
+
+		        return ResponseEntity.ok(responseDTO);
+
+		    } catch (Exception e) {
+		        ResponseDTO responseDTO = createServiceResponseError(
+		                responseObjectsMap,
+		                "Mode Master information retrieval failed",
+		                e.getMessage());
+
+		        return ResponseEntity.badRequest().body(responseDTO);
+		    }
+		}
+		
 
 }
