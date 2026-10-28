@@ -10,5 +10,8 @@ import com.whydigit.fms.entity.ScreensVO;
 public interface ScreensRepo extends JpaRepository<ScreensVO, Long>{
 
 	List<ScreensVO> findByResponsibilityVO(ResponsibilityVO responsibilityVO);
+	
+	
+	
 
 }
