@@ -14,4 +14,9 @@ public interface ConfigRepo extends JpaRepository<ConfigVO, Long> {
 
 	@Query(value = "SELECT * FROM config " + "WHERE org_id = :orgId " + "AND branch = :branch", nativeQuery = true)
 	List<ConfigVO> findByOrgIdAndBranch(@Param("orgId") Long orgId, @Param("branch") Long branch);
+	
+	boolean existsByOrgIdAndCompanyIgnoreCase(Long orgId, String company);
+
+	boolean existsByOrgIdAndCompanyIgnoreCaseAndIdNot(Long orgId, String company, Long id);	
+  
 }

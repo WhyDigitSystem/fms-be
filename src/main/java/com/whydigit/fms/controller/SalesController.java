@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +18,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.whydigit.fms.ResponseDTO.BookingResponseDTO;
 import com.whydigit.fms.ResponseDTO.EnquiryResponseDTO;
@@ -327,19 +334,24 @@ public class SalesController extends BaseController {
 	// CREATE / UPDATE BOOKING
 	// =========================================================
 
-	@PutMapping("/createUpdateBooking")
+	@PutMapping(value = "/createUpdateBooking",
+	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ResponseDTO> createUpdateBooking(
-	        @RequestBody BookingDTO bookingDTO) {
+	        @RequestPart("bookingDTO") BookingDTO bookingDTO,
+//	        @RequestBody BookingDTO bookingDTO,
+
+	        @RequestPart(value = "files", required = false) MultipartFile[] files) {
 
 	    String methodName = "createUpdateBooking()";
+
 	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
 	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO;
 
 	    try {
-
 	        Map<String, Object> result =
-	        		salesService.createUpdateBooking(bookingDTO);
+	                salesService.createUpdateBooking(bookingDTO, files);
 
 	        responseObjectsMap.put(
 	                CommonConstant.STRING_MESSAGE,
@@ -349,10 +361,7 @@ public class SalesController extends BaseController {
 	                "bookingVO",
 	                result.get("bookingVO"));
 
-	        ResponseDTO responseDTO =
-	                createServiceResponse(responseObjectsMap);
-
-	        return ResponseEntity.ok(responseDTO);
+	        responseDTO = createServiceResponse(responseObjectsMap);
 
 	    } catch (Exception e) {
 
@@ -361,19 +370,40 @@ public class SalesController extends BaseController {
 	                methodName,
 	                e.getMessage());
 
-	        ResponseDTO responseDTO = createServiceResponseError(
+	        responseDTO = createServiceResponseError(
 	                responseObjectsMap,
 	                "Booking creation/update failed",
 	                e.getMessage());
-
-	        return ResponseEntity.badRequest().body(responseDTO);
-
-	    } finally {
-
-	        LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
 	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+	    return ResponseEntity.ok(responseDTO);
 	}
 
+	@GetMapping("/viewBookingFile/**")
+	public ResponseEntity<byte[]> viewBookingFile(
+	        HttpServletRequest request) {
+
+	    String methodName = "viewBookingFile()";
+
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    try {
+	        return salesService.viewBookingFile(request);
+
+	    } catch (Exception e) {
+
+	        LOGGER.error(
+	                UserConstants.ERROR_MSG_METHOD_NAME,
+	                methodName,
+	                e.getMessage());
+
+	        return ResponseEntity.status(500).build();
+	    }
+	
+	}
+	
 	// =========================================================
 	// GET BOOKING BY ID
 	// =========================================================

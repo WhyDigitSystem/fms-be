@@ -10,16 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookingInstructionDTO {
 
-    private Long id;
+//    private Long id;
 
     // Document Information
-    private String customerReferenceDocument;
 
-    private String packingList;
-
-    private String commercialInvoice;
-
-    private String dangerousGoodsDocument;
+    private String documentType;
 
     // Instructions
     private String pickupInstructions;

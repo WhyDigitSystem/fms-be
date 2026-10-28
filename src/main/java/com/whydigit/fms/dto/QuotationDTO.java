@@ -22,11 +22,19 @@ public class QuotationDTO {
 	private String companyName;
 	private String agentName;
 
+    private String enquiryNo;
+    private LocalDate enquiryDate;
 	// Route
-	private String originCode;
-	private String originCity;
-	private String destinationCode;
-	private String destinationCity;
+    private Long originCity;
+
+    // Destination City
+    private Long destinationCity;
+
+    // Origin Port
+    private Long originPort;
+
+    // Destination Port
+    private Long destinationPort;
 
 	// Commercial Information
 	private String paymentTerms;

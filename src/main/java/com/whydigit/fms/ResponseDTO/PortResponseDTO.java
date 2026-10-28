@@ -19,6 +19,8 @@ public class PortResponseDTO {
 
     private CountryResponseDTO country;
 
+    private CityResponseDetailsDTO city;
+
     private Long orgId;
 
     private BranchResponsesDTO branch;

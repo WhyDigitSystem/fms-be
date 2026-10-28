@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookingPartyDTO {
 
-    private Long id;
+//    private Long id;
 
     // Party Information
     private String shipper;

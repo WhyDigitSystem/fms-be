@@ -66,7 +66,7 @@ public class BookingPartyVO {
 
     // Booking Reference
     @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "booking_id")
     private BookingVO bookingVO;
 

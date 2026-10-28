@@ -45,6 +45,10 @@ public class PortVO
 	@ManyToOne
 	@JoinColumn(name = "country")
 	private CountryVO country;
+	
+	@ManyToOne
+	@JoinColumn(name = "city")
+	private CityVO city;
 
 	@Column(name = "org_id")
 	private Long orgId;

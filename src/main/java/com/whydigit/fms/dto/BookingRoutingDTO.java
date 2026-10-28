@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookingRoutingDTO {
 
-    private Long id;
+//    private Long id;
 
     private String placeOfReceipt;
 

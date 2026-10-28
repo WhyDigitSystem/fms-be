@@ -46,6 +46,11 @@ public class QuotationVO {
     @Column(name = "doc_date")
     private LocalDate docDate = LocalDate.now();
 
+    @Column(name = "enquiry_no", length = 20)
+    private String enquiryNo;
+    @Column(name = "enquiry_date")
+    private LocalDate enquiryDate;
+    
     @Column(name = "expiration_date", nullable = false)
     private LocalDate expirationDate;
 
@@ -56,17 +61,26 @@ public class QuotationVO {
     private String agentName;
 
     // Route
-    @Column(name = "origin_code", length = 5, nullable = false)
-    private String originCode;
 
-    @Column(name = "origin_city", length = 100, nullable = false)
-    private String originCity;
+ // Origin City
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origin_city", nullable = false)
+    private CityVO originCity;
 
-    @Column(name = "destination_code", length = 5, nullable = false)
-    private String destinationCode;
+    // Destination City
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_city", nullable = false)
+    private CityVO destinationCity;
 
-    @Column(name = "destination_city", length = 100, nullable = false)
-    private String destinationCity;
+    // Origin Port
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "origin_port", nullable = false)
+    private PortVO originPort;
+
+    // Destination Port
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destination_port", nullable = false)
+    private PortVO destinationPort;
 
     // Commercial Information
     @Column(name = "payment_terms", length = 100, nullable = false)

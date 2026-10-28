@@ -1,5 +1,6 @@
-
 package com.whydigit.fms.entity;
+
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +17,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "booking_instruction")
@@ -25,43 +28,52 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookingInstructionVO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_instructiongen")
-    @SequenceGenerator(
-            name = "booking_instructiongen",
-            sequenceName = "booking_instructionseq",
-            initialValue = 1000000001,
-            allocationSize = 1)
-    @Column(name = "booking_instruction_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_instructiongen")
+	@SequenceGenerator(name = "booking_instructiongen", sequenceName = "booking_instructionseq", initialValue = 1000000001, allocationSize = 1)
+	@Column(name = "booking_instruction_id")
+	private Long id;
 
-    // Document Information
-    @Column(name = "customer_reference_document", length = 500)
-    private String customerReferenceDocument;
+	// Document information
+	@Column(name = "document_type", length = 100)
+	private String documentType;
 
-    @Column(name = "packing_list", length = 500)
-    private String packingList;
+	// Public URL of the uploaded file (same as filePath in your GRN file entity)
+	@Column(name = "document")
+	private String document;
 
-    @Column(name = "commercial_invoice", length = 500)
-    private String commercialInvoice;
+	// File details (new, same as GrnFileUploadDetailsVO)
+	@Column(name = "file_name", length = 255)
+	private String fileName;          // saved name on disk
 
-    @Column(name = "dangerous_goods_document", length = 500)
-    private String dangerousGoodsDocument;
+	@Column(name = "original_name", length = 255)
+	private String originalName;      // name the user uploaded
 
-    // Instructions
-    @Column(name = "pickup_instructions", length = 2000)
-    private String pickupInstructions;
+	@Column(name = "file_size")
+	private Long fileSize;
 
-    @Column(name = "delivery_instructions", length = 2000)
-    private String deliveryInstructions;
+	@Column(name = "content_type", length = 100)
+	private String contentType;
 
-    @Column(name = "internal_remarks", length = 2000)
-    private String internalRemarks;
+	@Column(name = "upload_on")
+	private LocalDateTime uploadOn;
 
-    // Booking Reference
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id")
-    private BookingVO bookingVO;
+	// Instructions
+	@Column(name = "pickup_instructions", length = 2000)
+	private String pickupInstructions;
+
+	@Column(name = "delivery_instructions", length = 2000)
+	private String deliveryInstructions;
+
+	@Column(name = "internal_remarks", length = 2000)
+	private String internalRemarks;
+
+	// Booking reference
+	@JsonBackReference
+	@ManyToOne
+	@JoinColumn(name = "booking_id")
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
+	private BookingVO bookingVO;
 
 }

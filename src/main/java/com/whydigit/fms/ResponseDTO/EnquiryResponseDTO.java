@@ -17,27 +17,27 @@ public class EnquiryResponseDTO {
     private String docId;
     private LocalDate docDate;
     // Enquiry Information
-    private String customer;
+    private String company;
     private String movement;
 
     // Shipment Mode
     private String shipmentMode;
 
     // Route
-    private String fromLocation;
-    private String toLocation;
+    private CityResponseDetailsDTO fromLocation;
+    private CityResponseDetailsDTO toLocation;
 
     // Sea
-    private String originPort;
-    private String destinationPort;
+    private PortResponseDetailsDTO originPort;
+    private PortResponseDetailsDTO destinationPort;
 
     // Air
-    private String originAirport;
-    private String destinationAirport;
+    private PortResponseDetailsDTO originAirport;
+    private PortResponseDetailsDTO destinationAirport;
 
     // Road
-    private String originTerminal;
-    private String destinationTerminal;
+    private PortResponseDetailsDTO originTerminal;
+    private PortResponseDetailsDTO destinationTerminal;
 
     // Cargo
     private String cargoDescription;
