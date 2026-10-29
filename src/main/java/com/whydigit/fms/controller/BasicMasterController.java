@@ -7,9 +7,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,12 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.whydigit.fms.ResponseDTO.ConfigResponseDTO;
+import com.whydigit.fms.ResponseDTO.CustomerResponseDTO;
 import com.whydigit.fms.ResponseDTO.PortResponseDTO;
 import com.whydigit.fms.ResponseDTO.ProductResponseDTO;
 import com.whydigit.fms.ResponseDTO.ServiceResponseDTO;
 import com.whydigit.fms.common.CommonConstant;
 import com.whydigit.fms.common.UserConstants;
 import com.whydigit.fms.dto.ConfigDTO;
+import com.whydigit.fms.dto.CustomerDTO;
 import com.whydigit.fms.dto.PortDTO;
 import com.whydigit.fms.dto.ProductDTO;
 import com.whydigit.fms.dto.ResponseDTO;
@@ -463,6 +467,43 @@ public class BasicMasterController extends BaseController {
 		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
 
 		return ResponseEntity.ok(responseDTO);
+	}
+
+	// =========================================================
+	// CREATE / UPDATE CUSTOMER
+	// =========================================================
+
+	@PutMapping("/createUpdateCustomer")
+	public ResponseEntity<Map<String, Object>> createUpdateCustomer(@RequestBody CustomerDTO customerDTO) {
+
+		Map<String, Object> response = basicMasterService.createUpdateCustomer(customerDTO);
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	// =========================================================
+	// GET CUSTOMER BY ID
+	// =========================================================
+
+	@GetMapping("getByCustomerId")
+	public ResponseEntity<CustomerResponseDTO> getCustomerById(@RequestParam Long id) {
+
+		CustomerResponseDTO response = basicMasterService.getCustomerById(id);
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	// =========================================================
+	// GET CUSTOMERS BY Branch AND ORGANIZATION ID
+	// =========================================================
+
+	@GetMapping("/getByCustomerByBranchAndOrgId")
+	public ResponseEntity<List<CustomerResponseDTO>> getCustomersByBranchAndOrgId(@RequestParam Long orgId,
+			@RequestParam Long branchId) {
+
+		List<CustomerResponseDTO> response = basicMasterService.getCustomersByBranchAndOrgId(orgId, branchId);
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 }
