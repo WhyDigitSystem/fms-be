@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +21,19 @@ import com.whydigit.fms.ResponseDTO.ConfigProductResponsesDTO;
 import com.whydigit.fms.ResponseDTO.ConfigResponseDTO;
 import com.whydigit.fms.ResponseDTO.ConfigServiceResponsesDTO;
 import com.whydigit.fms.ResponseDTO.CountryResponseDTO;
+import com.whydigit.fms.ResponseDTO.CustomerAddressResponseDTO;
+import com.whydigit.fms.ResponseDTO.CustomerResponseDTO;
 import com.whydigit.fms.ResponseDTO.PortResponseDTO;
 import com.whydigit.fms.ResponseDTO.ProductResponseDTO;
 import com.whydigit.fms.ResponseDTO.ServiceResponseDTO;
+import com.whydigit.fms.ResponseDTO.StateDetailResponseDTO;
+import com.whydigit.fms.ResponseDTO.StateResponseDTO;
 import com.whydigit.fms.dto.ConfigDTO;
 import com.whydigit.fms.dto.ConfigModeDTO;
 import com.whydigit.fms.dto.ConfigProductDTO;
 import com.whydigit.fms.dto.ConfigServiceDTO;
+import com.whydigit.fms.dto.CustomerAddressDTO;
+import com.whydigit.fms.dto.CustomerDTO;
 import com.whydigit.fms.dto.PortDTO;
 import com.whydigit.fms.dto.ProductDTO;
 import com.whydigit.fms.dto.ServiceDTO;
@@ -35,9 +44,12 @@ import com.whydigit.fms.entity.ConfigProductVO;
 import com.whydigit.fms.entity.ConfigServiceVO;
 import com.whydigit.fms.entity.ConfigVO;
 import com.whydigit.fms.entity.CountryVO;
+import com.whydigit.fms.entity.CustomerAddressVO;
+import com.whydigit.fms.entity.CustomerVO;
 import com.whydigit.fms.entity.PortVO;
 import com.whydigit.fms.entity.ProductVO;
 import com.whydigit.fms.entity.ServiceVO;
+import com.whydigit.fms.entity.StateVO;
 import com.whydigit.fms.repo.BranchRepo;
 import com.whydigit.fms.repo.CityRepo;
 import com.whydigit.fms.repo.ConfigModeRepo;
@@ -45,9 +57,11 @@ import com.whydigit.fms.repo.ConfigProductRepo;
 import com.whydigit.fms.repo.ConfigRepo;
 import com.whydigit.fms.repo.ConfigServiceRepo;
 import com.whydigit.fms.repo.CountryRepository;
+import com.whydigit.fms.repo.CustomerRepository;
 import com.whydigit.fms.repo.PortRepo;
 import com.whydigit.fms.repo.ProductRepo;
 import com.whydigit.fms.repo.ServiceRepo;
+import com.whydigit.fms.repo.StateRepo;
 
 @Service
 public class BasicMasterServiceImpl implements BasicMasterService {
@@ -80,9 +94,18 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 	@Autowired
 	private ConfigServiceRepo configServiceRepository;
-	
+
 	@Autowired
 	CityRepo cityRepo;
+	// CUSTOMER REPOSITORIES
+	@Autowired
+	private CustomerRepository customerRepository;
+
+	@Autowired
+	private StateRepo stateRepository;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	// PRODUCT - CREATE / UPDATE
 
@@ -422,7 +445,7 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 				.orElseThrow(() -> new RuntimeException("Country not found with id: " + portDTO.getCountry()));
 
 		portVO.setCountry(countryVO);
-		
+
 		CityVO cityVO = cityRepo.findById(portDTO.getCity())
 				.orElseThrow(() -> new RuntimeException("City not found with id: " + portDTO.getCountry()));
 
@@ -476,17 +499,16 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 			response.setCountry(countryResponse);
 		}
-		
+
 		if (portVO.getCity() != null) {
-		    CityResponseDetailsDTO cityResponse = new CityResponseDetailsDTO();
+			CityResponseDetailsDTO cityResponse = new CityResponseDetailsDTO();
 
-		    cityResponse.setId(portVO.getCity().getId());
-		    cityResponse.setCity(portVO.getCity().getCityName());
-		    cityResponse.setCityCode(portVO.getCity().getCityCode());
+			cityResponse.setId(portVO.getCity().getId());
+			cityResponse.setCity(portVO.getCity().getCityName());
+			cityResponse.setCityCode(portVO.getCity().getCityCode());
 
-		    response.setCity(cityResponse);
+			response.setCity(cityResponse);
 		}
-
 
 		response.setActive(portVO.getActive());
 
@@ -531,102 +553,94 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 	// CREATE OR UPDATE CONFIGURATION
 	// =========================================================
 
-	 // CREATE OR UPDATE CONFIGURATION
-		@Override
-		@Transactional
-		public Map<String, Object> createUpdateConfig(ConfigDTO dto) {
+	// CREATE OR UPDATE CONFIGURATION
+	@Override
+	@Transactional
+	public Map<String, Object> createUpdateConfig(ConfigDTO dto) {
 
-			Map<String, Object> response = new HashMap<>();
+		Map<String, Object> response = new HashMap<>();
 
-			String message;
-			ConfigVO configVO;
-			String screenCode = "CONFIG";
-		
-			// COMPANY NAME VALIDATION BASED ON ORG ID
+		String message;
+		ConfigVO configVO;
+		String screenCode = "CONFIG";
 
-			if (dto.getOrgId() == null) {
-			    throw new RuntimeException("Organization ID is required");
-			}
+		// COMPANY NAME VALIDATION BASED ON ORG ID
 
-			if (dto.getCompany() == null || dto.getCompany().trim().isEmpty()) {
-			    throw new RuntimeException("Company name is required");
-			}
-
-			String company = dto.getCompany().trim();
-
-			if (dto.getId() == null) {
-
-			    // CREATE: Check duplicate company within the same organization
-			    if (configRepository.existsByOrgIdAndCompanyIgnoreCase(
-			            dto.getOrgId(), company)) {
-
-			        throw new RuntimeException(
-			                "Company '" + company
-			                + "' already exists for organization ID: " + dto.getOrgId());
-			    }
-
-			} else {
-
-			    // UPDATE: Exclude the current configuration from the duplicate check
-			    if (configRepository.existsByOrgIdAndCompanyIgnoreCaseAndIdNot(
-			            dto.getOrgId(), company, dto.getId())) {
-
-			        throw new RuntimeException(
-			                "Company '" + company
-			                + "' already exists for organization ID: " + dto.getOrgId());
-			    }
-			}
-		
-
-			// CREATE
-			if (dto.getId() == null) {
-
-				configVO = new ConfigVO();
-
-				configVO.setCreatedBy(dto.getCreatedBy());
-				configVO.setUpdatedBy(dto.getCreatedBy());
-
-				message = "Configuration Created Successfully";
-
-			} else {
-
-				// UPDATE
-
-				configVO = configRepository.findById(dto.getId())
-						.orElseThrow(() -> new RuntimeException("Configuration Not Found with id: " + dto.getId()));
-
-				List<ConfigModeVO> oldModes = configModeRepository.findByConfig(configVO);
-
-				configModeRepository.deleteAll(oldModes);
-
-				List<ConfigProductVO> oldProducts = configProductRepository.findByConfig(configVO);
-
-				configProductRepository.deleteAll(oldProducts);
-
-				List<ConfigServiceVO> oldServices = configServiceRepository.findByConfig(configVO);
-
-				configServiceRepository.deleteAll(oldServices);
-
-				configVO.setUpdatedBy(dto.getCreatedBy());
-
-				message = "Configuration Updated Successfully";
-			}
-
-			// HEADER + CHILD MAPPING
-			getConfigVOFromDTO(dto, configVO);
-
-
-			configVO = configRepository.saveAndFlush(configVO);
-
-			ConfigResponseDTO responseDTO = convertConfigToResponseDTO(configVO);
-
-			response.put("message", message);
-			response.put("configResponseVO", responseDTO);
-
-			return response;
+		if (dto.getOrgId() == null) {
+			throw new RuntimeException("Organization ID is required");
 		}
 
+		if (dto.getCompany() == null || dto.getCompany().trim().isEmpty()) {
+			throw new RuntimeException("Company name is required");
+		}
 
+		String company = dto.getCompany().trim();
+
+		if (dto.getId() == null) {
+
+			// CREATE: Check duplicate company within the same organization
+			if (configRepository.existsByOrgIdAndCompanyIgnoreCase(dto.getOrgId(), company)) {
+
+				throw new RuntimeException(
+						"Company '" + company + "' already exists for organization ID: " + dto.getOrgId());
+			}
+
+		} else {
+
+			// UPDATE: Exclude the current configuration from the duplicate check
+			if (configRepository.existsByOrgIdAndCompanyIgnoreCaseAndIdNot(dto.getOrgId(), company, dto.getId())) {
+
+				throw new RuntimeException(
+						"Company '" + company + "' already exists for organization ID: " + dto.getOrgId());
+			}
+		}
+
+		// CREATE
+		if (dto.getId() == null) {
+
+			configVO = new ConfigVO();
+
+			configVO.setCreatedBy(dto.getCreatedBy());
+			configVO.setUpdatedBy(dto.getCreatedBy());
+
+			message = "Configuration Created Successfully";
+
+		} else {
+
+			// UPDATE
+
+			configVO = configRepository.findById(dto.getId())
+					.orElseThrow(() -> new RuntimeException("Configuration Not Found with id: " + dto.getId()));
+
+			List<ConfigModeVO> oldModes = configModeRepository.findByConfig(configVO);
+
+			configModeRepository.deleteAll(oldModes);
+
+			List<ConfigProductVO> oldProducts = configProductRepository.findByConfig(configVO);
+
+			configProductRepository.deleteAll(oldProducts);
+
+			List<ConfigServiceVO> oldServices = configServiceRepository.findByConfig(configVO);
+
+			configServiceRepository.deleteAll(oldServices);
+
+			configVO.setUpdatedBy(dto.getCreatedBy());
+
+			message = "Configuration Updated Successfully";
+		}
+
+		// HEADER + CHILD MAPPING
+		getConfigVOFromDTO(dto, configVO);
+
+		configVO = configRepository.saveAndFlush(configVO);
+
+		ConfigResponseDTO responseDTO = convertConfigToResponseDTO(configVO);
+
+		response.put("message", message);
+		response.put("configResponseVO", responseDTO);
+
+		return response;
+	}
 
 	// =========================================================
 	// CONFIGURATION - HEADER + CHILD MAPPING
@@ -642,7 +656,6 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 		configVO.setOrgId(dto.getOrgId());
 		configVO.setCancelRemarks(dto.getCancelRemarks());
 
-	
 		// =====================================================
 		// BRANCH MAPPING
 		// =====================================================
@@ -906,4 +919,435 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 		return configs.stream().map(this::convertConfigToResponseDTO).collect(Collectors.toList());
 	}
 
+	@Override
+	@Transactional
+	public Map<String, Object> createUpdateCustomer(CustomerDTO customerDTO) {
+
+		CustomerVO customerVO;
+		String message;
+
+		// ==========================================
+		// 1. CREATE OR UPDATE CUSTOMER
+		// ==========================================
+
+		if (customerDTO.getId() == null) {
+
+			// Create new customer
+			customerVO = new CustomerVO();
+
+			customerVO.setCreatedBy(customerDTO.getCreatedBy());
+			customerVO.setUpdatedBy(customerDTO.getCreatedBy());
+
+			message = "Customer Creation Successfully";
+
+		} else {
+
+			// Update existing customer
+			customerVO = customerRepository.findById(customerDTO.getId())
+					.orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerDTO.getId()));
+
+			customerVO.setUpdatedBy(customerDTO.getCreatedBy());
+
+			message = "Customer Updation Successfully";
+		}
+
+		// ==========================================
+		// 2. MAP CUSTOMER DTO TO CUSTOMER VO
+		// ==========================================
+
+		customerVO.setOrgId(customerDTO.getOrgId());
+		customerVO.setCustomerName(customerDTO.getCustomerName());
+		customerVO.setCustomerType(customerDTO.getCustomerType());
+		customerVO.setGstin(customerDTO.getGstin());
+		customerVO.setPan(customerDTO.getPan());
+		customerVO.setIndustryType(customerDTO.getIndustryType());
+		customerVO.setCancelRemarks(customerDTO.getCancelRemarks());
+
+		// DTO fields are boolean
+		customerVO.setActive(customerDTO.isActive());
+		customerVO.setCancel(customerDTO.isCancel());
+
+		// ==========================================
+		// 3. MAP BRANCH
+		// ==========================================
+
+		if (customerDTO.getBranch() != null) {
+
+			BranchVO branchVO = branchRepository.findById(customerDTO.getBranch())
+					.orElseThrow(() -> new RuntimeException("Branch not found with id: " + customerDTO.getBranch()));
+
+			customerVO.setBranch(branchVO);
+
+		} else {
+
+			customerVO.setBranch(null);
+		}
+
+		// ==========================================
+		// 4. INITIALIZE CUSTOMER ADDRESSES
+		// ==========================================
+
+		if (customerVO.getCustomerAddresses() == null) {
+			customerVO.setCustomerAddresses(new ArrayList<>());
+		}
+
+		// ==========================================
+		// 5. MAP CUSTOMER ADDRESSES
+		// ==========================================
+
+		if (customerDTO.getCustomerAddresses() != null) {
+
+			for (CustomerAddressDTO addressDTO : customerDTO.getCustomerAddresses()) {
+
+				CustomerAddressVO addressVO;
+
+				// --------------------------------------
+				// UPDATE EXISTING ADDRESS
+				// --------------------------------------
+
+				if (addressDTO.getId() != null) {
+
+					addressVO = customerVO.getCustomerAddresses().stream()
+							.filter(address -> address.getId() != null && address.getId().equals(addressDTO.getId()))
+							.findFirst().orElseThrow(() -> new RuntimeException(
+									"Customer address not found with id: " + addressDTO.getId()));
+
+				} else {
+
+					// ----------------------------------
+					// CREATE NEW ADDRESS
+					// ----------------------------------
+
+					addressVO = new CustomerAddressVO();
+
+					addressVO.setCustomer(customerVO);
+
+					customerVO.getCustomerAddresses().add(addressVO);
+				}
+
+				// --------------------------------------
+				// MAP ADDRESS FIELDS
+				// --------------------------------------
+
+				addressVO.setAddress(addressDTO.getAddress());
+				addressVO.setPostalCode(addressDTO.getPostalCode());
+				addressVO.setContactName(addressDTO.getContactName());
+				addressVO.setMobile(addressDTO.getMobile());
+				addressVO.setAlternateMobile(addressDTO.getAlternateMobile());
+				addressVO.setEmail(addressDTO.getEmail());
+				addressVO.setLandmark(addressDTO.getLandmark());
+
+				// --------------------------------------
+				// MAP COUNTRY
+				// --------------------------------------
+
+				if (addressDTO.getCountry() != null) {
+
+					CountryVO countryVO = countryRepository.findById(addressDTO.getCountry()).orElseThrow(
+							() -> new RuntimeException("Country not found with id: " + addressDTO.getCountry()));
+
+					addressVO.setCountry(countryVO);
+
+				} else {
+
+					addressVO.setCountry(null);
+				}
+
+				// --------------------------------------
+				// MAP STATE
+				// --------------------------------------
+
+				if (addressDTO.getState() != null) {
+
+					StateVO stateVO = stateRepository.findById(addressDTO.getState()).orElseThrow(
+							() -> new RuntimeException("State not found with id: " + addressDTO.getState()));
+
+					addressVO.setState(stateVO);
+
+				} else {
+
+					addressVO.setState(null);
+				}
+
+				// --------------------------------------
+				// MAP CITY
+				// --------------------------------------
+
+				if (addressDTO.getCity() != null) {
+
+					CityVO cityVO = cityRepo.findById(addressDTO.getCity())
+							.orElseThrow(() -> new RuntimeException("City not found with id: " + addressDTO.getCity()));
+
+					addressVO.setCity(cityVO);
+
+				} else {
+
+					addressVO.setCity(null);
+				}
+
+				// --------------------------------------
+				// MAINTAIN PARENT-CHILD RELATIONSHIP
+				// --------------------------------------
+
+				addressVO.setCustomer(customerVO);
+			}
+		}
+
+		// ==========================================
+		// 6. SAVE CUSTOMER AND ADDRESSES
+		// ==========================================
+
+		CustomerVO savedCustomer = customerRepository.saveAndFlush(customerVO);
+
+		// ==========================================
+		// 7. MAP CUSTOMER TO RESPONSE DTO
+		// ==========================================
+
+		CustomerResponseDTO responseDTO = new CustomerResponseDTO();
+
+		responseDTO.setId(savedCustomer.getId());
+		responseDTO.setOrgId(savedCustomer.getOrgId());
+		responseDTO.setCustomerName(savedCustomer.getCustomerName());
+		responseDTO.setCustomerType(savedCustomer.getCustomerType());
+		responseDTO.setGstin(savedCustomer.getGstin());
+		responseDTO.setPan(savedCustomer.getPan());
+		responseDTO.setIndustryType(savedCustomer.getIndustryType());
+
+		// Entity custom getters return String values
+		responseDTO.setActive(savedCustomer.getActive());
+		responseDTO.setCancel(savedCustomer.getCancel());
+
+		responseDTO.setCancelRemarks(savedCustomer.getCancelRemarks());
+		responseDTO.setCreatedBy(savedCustomer.getCreatedBy());
+		responseDTO.setUpdatedBy(savedCustomer.getUpdatedBy());
+		responseDTO.setCommonDate(savedCustomer.getCommonDate());
+
+		// ==========================================
+		// 8. MAP BRANCH RESPONSE
+		// ==========================================
+
+		if (savedCustomer.getBranch() != null) {
+
+			BranchResponsesDTO branchResponse = new BranchResponsesDTO();
+
+			branchResponse.setId(savedCustomer.getBranch().getId());
+			branchResponse.setBranch(savedCustomer.getBranch().getBranch());
+			branchResponse.setBranchCode(savedCustomer.getBranch().getBranchCode());
+
+			responseDTO.setBranch(branchResponse);
+		}
+
+		// ==========================================
+		// 9. MAP CUSTOMER ADDRESS RESPONSES
+		// ==========================================
+
+		List<CustomerAddressResponseDTO> addressResponses = new ArrayList<>();
+
+		if (savedCustomer.getCustomerAddresses() != null) {
+
+			for (CustomerAddressVO addressVO : savedCustomer.getCustomerAddresses()) {
+
+				CustomerAddressResponseDTO addressResponse = new CustomerAddressResponseDTO();
+
+				addressResponse.setId(addressVO.getId());
+				addressResponse.setAddress(addressVO.getAddress());
+				addressResponse.setPostalCode(addressVO.getPostalCode());
+				addressResponse.setContactName(addressVO.getContactName());
+				addressResponse.setMobile(addressVO.getMobile());
+				addressResponse.setAlternateMobile(addressVO.getAlternateMobile());
+				addressResponse.setEmail(addressVO.getEmail());
+				addressResponse.setLandmark(addressVO.getLandmark());
+
+				// --------------------------------------
+				// COUNTRY RESPONSE
+				// --------------------------------------
+
+				if (addressVO.getCountry() != null) {
+
+					CountryResponseDTO countryResponse = new CountryResponseDTO();
+
+					countryResponse.setId(addressVO.getCountry().getId());
+					countryResponse.setCountry(addressVO.getCountry().getCountryName());
+					countryResponse.setCountryCode(addressVO.getCountry().getCountryCode());
+
+					addressResponse.setCountry(countryResponse);
+				}
+
+				// --------------------------------------
+				// STATE RESPONSE
+				// --------------------------------------
+
+				if (addressVO.getState() != null) {
+
+					StateDetailResponseDTO stateResponse = new StateDetailResponseDTO();
+
+					stateResponse.setId(addressVO.getState().getId());
+					stateResponse.setStateName(addressVO.getState().getStateName());
+					stateResponse.setStateCode(addressVO.getState().getStateCode());
+
+					addressResponse.setState(stateResponse);
+				}
+
+				// --------------------------------------
+				// CITY RESPONSE
+				// --------------------------------------
+
+				if (addressVO.getCity() != null) {
+
+					CityResponseDetailsDTO cityResponse = new CityResponseDetailsDTO();
+
+					cityResponse.setId(addressVO.getCity().getId());
+					cityResponse.setCity(addressVO.getCity().getCityName());
+					cityResponse.setCityCode(addressVO.getCity().getCityCode());
+
+					addressResponse.setCity(cityResponse);
+				}
+
+				addressResponses.add(addressResponse);
+			}
+		}
+
+		responseDTO.setCustomerAddresses(addressResponses);
+
+		// ==========================================
+		// 10. FINAL RESPONSE
+		// ==========================================
+
+		Map<String, Object> response = new HashMap<>();
+
+		response.put("message", message);
+		response.put("customerVO", responseDTO);
+
+		return response;
+	}
+
+	private CustomerResponseDTO convertCustomerToResponseDTO(CustomerVO customerVO) {
+
+		CustomerResponseDTO responseDTO = new CustomerResponseDTO();
+
+		// ==========================================
+		// CUSTOMER DETAILS
+		// ==========================================
+
+		responseDTO.setId(customerVO.getId());
+		responseDTO.setOrgId(customerVO.getOrgId());
+		responseDTO.setCustomerName(customerVO.getCustomerName());
+		responseDTO.setCustomerType(customerVO.getCustomerType());
+		responseDTO.setGstin(customerVO.getGstin());
+		responseDTO.setPan(customerVO.getPan());
+		responseDTO.setIndustryType(customerVO.getIndustryType());
+
+		responseDTO.setActive(customerVO.getActive());
+		responseDTO.setCancel(customerVO.getCancel());
+
+		responseDTO.setCancelRemarks(customerVO.getCancelRemarks());
+		responseDTO.setCreatedBy(customerVO.getCreatedBy());
+		responseDTO.setUpdatedBy(customerVO.getUpdatedBy());
+		responseDTO.setCommonDate(customerVO.getCommonDate());
+
+		// ==========================================
+		// BRANCH DETAILS
+		// ==========================================
+
+		if (customerVO.getBranch() != null) {
+
+			BranchResponsesDTO branchResponse = new BranchResponsesDTO();
+
+			branchResponse.setId(customerVO.getBranch().getId());
+			branchResponse.setBranch(customerVO.getBranch().getBranch());
+			branchResponse.setBranchCode(customerVO.getBranch().getBranchCode());
+
+			responseDTO.setBranch(branchResponse);
+		}
+
+		// ==========================================
+		// CUSTOMER ADDRESS DETAILS
+		// ==========================================
+
+		List<CustomerAddressResponseDTO> addressResponses = new ArrayList<>();
+
+		if (customerVO.getCustomerAddresses() != null) {
+
+			for (CustomerAddressVO addressVO : customerVO.getCustomerAddresses()) {
+
+				CustomerAddressResponseDTO addressResponse = new CustomerAddressResponseDTO();
+
+				addressResponse.setId(addressVO.getId());
+				addressResponse.setAddress(addressVO.getAddress());
+				addressResponse.setPostalCode(addressVO.getPostalCode());
+				addressResponse.setContactName(addressVO.getContactName());
+				addressResponse.setMobile(addressVO.getMobile());
+				addressResponse.setAlternateMobile(addressVO.getAlternateMobile());
+				addressResponse.setEmail(addressVO.getEmail());
+				addressResponse.setLandmark(addressVO.getLandmark());
+
+				// COUNTRY
+				if (addressVO.getCountry() != null) {
+
+					CountryResponseDTO countryResponse = new CountryResponseDTO();
+
+					countryResponse.setId(addressVO.getCountry().getId());
+					countryResponse.setCountry(addressVO.getCountry().getCountryName());
+					countryResponse.setCountryCode(addressVO.getCountry().getCountryCode());
+
+					addressResponse.setCountry(countryResponse);
+				}
+
+				// STATE
+				if (addressVO.getState() != null) {
+
+					StateDetailResponseDTO stateResponse = new StateDetailResponseDTO();
+
+					stateResponse.setId(addressVO.getState().getId());
+					stateResponse.setStateName(addressVO.getState().getStateName());
+					stateResponse.setStateCode(addressVO.getState().getStateCode());
+
+					addressResponse.setState(stateResponse);
+				}
+
+				// CITY
+				if (addressVO.getCity() != null) {
+
+					CityResponseDetailsDTO cityResponse = new CityResponseDetailsDTO();
+
+					cityResponse.setId(addressVO.getCity().getId());
+					cityResponse.setCity(addressVO.getCity().getCityName());
+					cityResponse.setCityCode(addressVO.getCity().getCityCode());
+
+					addressResponse.setCity(cityResponse);
+				}
+
+				addressResponses.add(addressResponse);
+			}
+		}
+
+		responseDTO.setCustomerAddresses(addressResponses);
+
+		return responseDTO;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public CustomerResponseDTO getCustomerById(Long id) {
+
+		CustomerVO customerVO = customerRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+
+		return convertCustomerToResponseDTO(customerVO);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<CustomerResponseDTO> getCustomersByBranchAndOrgId(Long orgId, Long branchId) {
+
+		List<CustomerVO> customers = customerRepository.findByOrgIdAndBranch_Id(orgId, branchId);
+
+		List<CustomerResponseDTO> responseList = new ArrayList<>();
+
+		for (CustomerVO customerVO : customers) {
+			responseList.add(convertCustomerToResponseDTO(customerVO));
+		}
+
+		return responseList;
+	}
 }

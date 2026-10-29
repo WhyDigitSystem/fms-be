@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.whydigit.fms.ResponseDTO.ConfigResponseDTO;
+import com.whydigit.fms.ResponseDTO.CustomerResponseDTO;
 import com.whydigit.fms.ResponseDTO.PortResponseDTO;
 import com.whydigit.fms.ResponseDTO.ProductResponseDTO;
 import com.whydigit.fms.ResponseDTO.ServiceResponseDTO;
 import com.whydigit.fms.dto.ConfigDTO;
+import com.whydigit.fms.dto.CustomerDTO;
 import com.whydigit.fms.dto.PortDTO;
 import com.whydigit.fms.dto.ProductDTO;
 import com.whydigit.fms.dto.ServiceDTO;
@@ -42,4 +44,11 @@ public interface BasicMasterService {
 	ConfigResponseDTO getConfigById(Long id);
 
 	List<ConfigResponseDTO> getConfigByOrgIdAndBranch(Long orgId, Long branch);
+
+	// CUSTOMER
+	Map<String, Object> createUpdateCustomer(CustomerDTO customerDTO);
+
+	CustomerResponseDTO getCustomerById(Long id);
+
+	List<CustomerResponseDTO> getCustomersByBranchAndOrgId(Long orgId, Long branchId);
 }
