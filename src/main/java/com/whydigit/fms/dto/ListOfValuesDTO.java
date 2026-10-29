@@ -1,0 +1,27 @@
+package com.whydigit.fms.dto;
+
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ListOfValuesDTO {
+	private Long id;
+	private String listCode;
+	private String listDescription;
+	private Long orgId;
+	private String createdBy;
+	
+	
+	private boolean active;
+	private String cancelRemarks;
+
+	private Long branch;
+		
+	private List<ListOfValuesDetailsDTO> details;
+
+}

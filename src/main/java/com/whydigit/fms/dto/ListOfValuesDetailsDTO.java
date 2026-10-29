@@ -1,0 +1,16 @@
+package com.whydigit.fms.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ListOfValuesDetailsDTO {
+	private Long id;
+	private String valueCode;
+	private String valueDescription;
+	private boolean active;
+}
+

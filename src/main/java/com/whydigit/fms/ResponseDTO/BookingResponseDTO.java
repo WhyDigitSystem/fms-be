@@ -16,6 +16,10 @@ public class BookingResponseDTO {
     private String docId;
     private LocalDate docDate;
 
+    private String type;
+
+	private String quotationNo;
+	private LocalDate quotationDate;
     private String bookingType;
     private String transportMode;
     private String serviceType;

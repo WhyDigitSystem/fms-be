@@ -20,6 +20,10 @@ public class QuotationResponseDTO {
     private LocalDate docDate;
     private LocalDate expirationDate;
 
+    private String movement; // Import / Export
+
+	// Shipment Mode
+	private String shipmentMode; // Sea / Air / Road
     private String enquiryNo;
     private LocalDate enquiryDate;
     

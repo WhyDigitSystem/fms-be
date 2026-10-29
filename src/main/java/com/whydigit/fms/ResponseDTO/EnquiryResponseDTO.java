@@ -27,13 +27,13 @@ public class EnquiryResponseDTO {
     private CityResponseDetailsDTO fromLocation;
     private CityResponseDetailsDTO toLocation;
 
-    // Sea
-    private PortResponseDetailsDTO originPort;
-    private PortResponseDetailsDTO destinationPort;
-
-    // Air
-    private PortResponseDetailsDTO originAirport;
-    private PortResponseDetailsDTO destinationAirport;
+//    // Sea
+//    private PortResponseDetailsDTO originPort;
+//    private PortResponseDetailsDTO destinationPort;
+//
+//    // Air
+//    private PortResponseDetailsDTO originAirport;
+//    private PortResponseDetailsDTO destinationAirport;
 
     // Road
     private PortResponseDetailsDTO originTerminal;
@@ -41,7 +41,9 @@ public class EnquiryResponseDTO {
 
     // Cargo
     private String cargoDescription;
-    private String cargoType;
+    private ListOfValuesDetailsResponseDTO cargoType;
+    private ListOfValuesDetailsResponseDTO cargoGroup;
+
     private BigDecimal volumeCbm;
     private BigDecimal grossWeightKg;
     private int noOfPackages;

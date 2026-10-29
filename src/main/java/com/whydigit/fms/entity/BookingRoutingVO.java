@@ -34,11 +34,13 @@ public class BookingRoutingVO {
     @Column(name = "place_of_receipt")
     private String placeOfReceipt;
 
-    @Column(name = "origin")
-    private String origin;
+    @ManyToOne
+    @JoinColumn(name = "origin_port")
+    private PortVO originPort;
 
-    @Column(name = "destination")
-    private String destination;
+    @ManyToOne
+    @JoinColumn(name = "destination_port")
+    private PortVO destinationPort;
 
     @Column(name = "place_of_delivery")
     private String placeOfDelivery;

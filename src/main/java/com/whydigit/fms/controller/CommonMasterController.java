@@ -39,6 +39,7 @@ import com.whydigit.fms.dto.DocumentTypeMappingDTO;
 import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
 import com.whydigit.fms.dto.GlobalParameterDTO;
+import com.whydigit.fms.dto.ListOfValuesDTO;
 import com.whydigit.fms.dto.ModeMasterDTO;
 import com.whydigit.fms.dto.ResponseDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
@@ -52,6 +53,7 @@ import com.whydigit.fms.entity.DesignationVO;
 import com.whydigit.fms.entity.DocumentTypeMasterVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
+import com.whydigit.fms.entity.ListOfValuesVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
 import com.whydigit.fms.entity.UserProfileInformationVO;
 import com.whydigit.fms.service.CommonMasterService;
@@ -1546,5 +1548,117 @@ public class CommonMasterController extends BaseController {
 		    }
 		}
 		
+		
+		@PutMapping("/updateCreateListOfValues")
+		public ResponseEntity<ResponseDTO> updateCreateListOfValues(@RequestBody ListOfValuesDTO listOfValuesDTO) {
+			String methodName = "updateCreateListOfValues()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+			String errorMsg = null;
+			Map<String, Object> responseObjectsMap = new HashMap<>();
+			ResponseDTO responseDTO = null;
+			try {
+				Map<String, Object> listOfValuesVO = commonMasterService.updateCreateListOfValues(listOfValuesDTO);
+				responseObjectsMap.put(CommonConstant.STRING_MESSAGE, listOfValuesVO.get("message"));
+				responseObjectsMap.put("listOfValuesVO", listOfValuesVO.get("listOfValuesVO"));
+				responseDTO = createServiceResponse(responseObjectsMap);
+			} catch (Exception e) {
+				errorMsg = e.getMessage();
+				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+				responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
+			}
+			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+			return ResponseEntity.ok().body(responseDTO);
+		}
+
+		@GetMapping("/getListOfValuesById")
+		public ResponseEntity<ResponseDTO> getListOfValuesById(@RequestParam Long id) {
+
+			String methodName = "getListOfValuesById()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+			Map<String, Object> responseObjectsMap = new HashMap<>();
+			String errorMsg = null;
+			ResponseDTO responseDTO = null;
+
+			try {
+
+				ListOfValuesVO listOfValuesVO = commonMasterService.getListOfValuesById(id);
+
+				responseObjectsMap.put("listOfValuesVO", listOfValuesVO);
+
+				responseDTO = createServiceResponse(responseObjectsMap);
+
+			} catch (Exception e) {
+
+				errorMsg = e.getMessage();
+				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+
+				responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
+			}
+
+			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+			return ResponseEntity.ok().body(responseDTO);
+		}
+
+		@GetMapping("/getListOfValuesByOrgId")
+		public ResponseEntity<ResponseDTO> getListOfValuesByOrgId(@RequestParam Long orgId, @RequestParam Long branchId) {
+
+			String methodName = "getListOfValuesByOrgId()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+			Map<String, Object> responseObjectsMap = new HashMap<>();
+			String errorMsg = null;
+			ResponseDTO responseDTO = null;
+
+			try {
+
+				List<ListOfValuesVO> listOfVlaues = commonMasterService.getListOfValuesByOrgId(orgId, branchId);
+
+				responseObjectsMap.put("listOfValues", listOfVlaues);
+
+				responseDTO = createServiceResponse(responseObjectsMap);
+
+			} catch (Exception e) {
+
+				errorMsg = e.getMessage();
+				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+
+				responseDTO = createServiceResponseError(responseObjectsMap, errorMsg, errorMsg);
+			}
+
+			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+			return ResponseEntity.ok().body(responseDTO);
+		}
+		
+		
+		@GetMapping("/getListValuesGroup")
+		public ResponseEntity<ResponseDTO> getListValuesGroup(@RequestParam Long orgId,
+				@RequestParam String listDescription) {
+			String methodName = "getListValuesGroup()";
+			LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+			String errorMsg = null;
+			Map<String, Object> responseObjectsMap = new HashMap<>();
+			ResponseDTO responseDTO = null;
+			List<Map<String, Object>> listValues = new ArrayList<>();
+			try {
+				listValues = commonMasterService.getBudgetGroup(orgId, listDescription);
+			} catch (Exception e) {
+				errorMsg = e.getMessage();
+				LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+			}
+			if (StringUtils.isBlank(errorMsg)) {
+				responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "List Values information get successfully");
+				responseObjectsMap.put("listValues", listValues);
+				responseDTO = createServiceResponse(responseObjectsMap);
+			} else {
+				responseDTO = createServiceResponseError(responseObjectsMap, "List Values information receive failed",
+						errorMsg);
+			}
+			LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+			return ResponseEntity.ok().body(responseDTO);
+		}
+
 
 }

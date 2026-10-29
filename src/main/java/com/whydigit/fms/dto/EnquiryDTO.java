@@ -17,6 +17,7 @@ public class EnquiryDTO {
     // Enquiry Information
     private String company;
     private String movement;
+    
 
     // Shipment Mode
     private String shipmentMode;
@@ -25,13 +26,13 @@ public class EnquiryDTO {
     private Long fromLocation;
     private Long toLocation;
 
-    // Sea
-    private Long originPort;
-    private Long destinationPort;
+//    // Sea
+//    private Long originPort;
+//    private Long destinationPort;
 
-    // Air
-    private Long originAirport;
-    private Long destinationAirport;
+//    // Air
+//    private Long originAirport;
+//    private Long destinationAirport;
 
     // Road
     private Long originTerminal;
@@ -39,7 +40,9 @@ public class EnquiryDTO {
 
     // Cargo
     private String cargoDescription;
-    private String cargoType;
+    private Long cargoType;
+    private Long cargoGroup;
+
     private BigDecimal volumeCbm;
     private BigDecimal grossWeightKg;
     private int noOfPackages;

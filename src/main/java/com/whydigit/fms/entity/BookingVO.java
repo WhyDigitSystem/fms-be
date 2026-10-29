@@ -47,7 +47,15 @@ public class BookingVO {
 
 	@Column(name = "bookingtype")
 	private String bookingType;
+	
+	@Column(name = "type")
+	private String type;
 
+	@Column(name = "quotation_no")
+	private String quotationNo;
+	@Column(name = "quotation_date")
+	private LocalDate quotationDate;
+	
 	@Column(name = "transportmode")
 	private String transportMode;
 

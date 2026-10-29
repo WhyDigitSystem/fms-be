@@ -41,6 +41,7 @@ import com.whydigit.fms.ResponseDTO.BranchResponseDTO;
 import com.whydigit.fms.ResponseDTO.CityResponseDetailsDTO;
 import com.whydigit.fms.ResponseDTO.CurrencyResponseDTO;
 import com.whydigit.fms.ResponseDTO.EnquiryResponseDTO;
+import com.whydigit.fms.ResponseDTO.ListOfValuesDetailsResponseDTO;
 import com.whydigit.fms.ResponseDTO.PortResponseDetailsDTO;
 import com.whydigit.fms.ResponseDTO.QuatationCommercialTermsResponseDTO;
 import com.whydigit.fms.ResponseDTO.QuatationShippingDetailsResponseDTO;
@@ -73,6 +74,8 @@ import com.whydigit.fms.entity.BranchVO;
 import com.whydigit.fms.entity.CurrencyVO;
 import com.whydigit.fms.entity.DocumentTypeMappingDetailsVO;
 import com.whydigit.fms.entity.EnquiryVO;
+import com.whydigit.fms.entity.ListOfValuesDetailsVO;
+import com.whydigit.fms.entity.PortVO;
 import com.whydigit.fms.entity.QuatationCommercialTermsVO;
 import com.whydigit.fms.entity.QuatationShippingDetailsVO;
 import com.whydigit.fms.entity.QuotationAirFreightRatesVO;
@@ -92,6 +95,7 @@ import com.whydigit.fms.repo.CityRepo;
 import com.whydigit.fms.repo.CurrencyRepo;
 import com.whydigit.fms.repo.DocumentTypeMappingDetailsRepo;
 import com.whydigit.fms.repo.EnquiryRepo;
+import com.whydigit.fms.repo.ListOfValuesDetailsRepo;
 import com.whydigit.fms.repo.PortRepo;
 import com.whydigit.fms.repo.QuatationCommercialTermsRepo;
 import com.whydigit.fms.repo.QuatationShippingDetailsRepo;
@@ -159,6 +163,9 @@ public class SalesServiceImpl implements SalesService {
 	
 	@Autowired
 	CityRepo cityRepo;
+	
+	@Autowired
+	ListOfValuesDetailsRepo listOfValuesDetailsRepo;
 
 	@Override
 	@Transactional
@@ -313,60 +320,60 @@ public class SalesServiceImpl implements SalesService {
 //		}
 
 		// SEA VALIDATION
-		if (mode.equalsIgnoreCase("SEA")) {
-
-			if (!StringUtils.hasText(dto.getCargoType())) {
-				throw new ApplicationException("Cargo Type Is Required For Sea Shipment");
-			}
-
-//			if (dto.getVolumeCbm() == null || dto.getVolumeCbm().compareTo(BigDecimal.ZERO) <= 0) {
-//				throw new ApplicationException("Valid Cargo Volume (CBM) Is Required For Sea Shipment");
+//		if (mode.equalsIgnoreCase("SEA")) {
+//
+//			if (!StringUtils.hasText(dto.getCargoType())) {
+//				throw new ApplicationException("Cargo Type Is Required For Sea Shipment");
 //			}
-
-			if (dto.getGrossWeightKg() == null || dto.getGrossWeightKg().compareTo(BigDecimal.ZERO) <= 0) {
-				throw new ApplicationException("Valid Gross Weight Is Required For Sea Shipment");
-			}
-		}
+//
+////			if (dto.getVolumeCbm() == null || dto.getVolumeCbm().compareTo(BigDecimal.ZERO) <= 0) {
+////				throw new ApplicationException("Valid Cargo Volume (CBM) Is Required For Sea Shipment");
+////			}
+//
+//			if (dto.getGrossWeightKg() == null || dto.getGrossWeightKg().compareTo(BigDecimal.ZERO) <= 0) {
+//				throw new ApplicationException("Valid Gross Weight Is Required For Sea Shipment");
+//			}
+//		}
 
 		// AIR VALIDATION
-		else if (mode.equalsIgnoreCase("AIR")) {
-
-			if (dto.getNoOfPackages() <= 0) {
-				throw new ApplicationException("Number Of Packages Must Be Greater Than Zero For Air Shipment");
-			}
-
-			if (dto.getGrossWeightKg() == null || dto.getGrossWeightKg().compareTo(BigDecimal.ZERO) <= 0) {
-				throw new ApplicationException("Valid Gross Weight Is Required For Air Shipment");
-			}
-
-			if (!isPositive(dto.getLengthCm())) {
-				throw new ApplicationException("Valid Length Is Required For Air Shipment");
-			}
-
-			if (!isPositive(dto.getWidthCm())) {
-				throw new ApplicationException("Valid Width Is Required For Air Shipment");
-			}
-
-			if (!isPositive(dto.getHeightCm())) {
-				throw new ApplicationException("Valid Height Is Required For Air Shipment");
-			}
-		}
-
-		// ROAD VALIDATION
-		else if (mode.equalsIgnoreCase("ROAD")) {
-
-			if (!StringUtils.hasText(dto.getVehicleType())) {
-				throw new ApplicationException("Vehicle Type Is Required For Road Shipment");
-			}
-
-			if (dto.getGrossWeightKg() == null || dto.getGrossWeightKg().compareTo(BigDecimal.ZERO) <= 0) {
-				throw new ApplicationException("Valid Gross Weight Is Required For Road Shipment");
-			}
-
-			if (dto.getNoOfPackages() <= 0) {
-				throw new ApplicationException("Number Of Packages Must Be Greater Than Zero For Road Shipment");
-			}
-		}
+//		else if (mode.equalsIgnoreCase("AIR")) {
+//
+//			if (dto.getNoOfPackages() <= 0) {
+//				throw new ApplicationException("Number Of Packages Must Be Greater Than Zero For Air Shipment");
+//			}
+//
+//			if (dto.getGrossWeightKg() == null || dto.getGrossWeightKg().compareTo(BigDecimal.ZERO) <= 0) {
+//				throw new ApplicationException("Valid Gross Weight Is Required For Air Shipment");
+//			}
+//
+//			if (!isPositive(dto.getLengthCm())) {
+//				throw new ApplicationException("Valid Length Is Required For Air Shipment");
+//			}
+//
+//			if (!isPositive(dto.getWidthCm())) {
+//				throw new ApplicationException("Valid Width Is Required For Air Shipment");
+//			}
+//
+//			if (!isPositive(dto.getHeightCm())) {
+//				throw new ApplicationException("Valid Height Is Required For Air Shipment");
+//			}
+//		}
+//
+//		// ROAD VALIDATION
+//		else if (mode.equalsIgnoreCase("ROAD")) {
+//
+//			if (!StringUtils.hasText(dto.getVehicleType())) {
+//				throw new ApplicationException("Vehicle Type Is Required For Road Shipment");
+//			}
+//
+//			if (dto.getGrossWeightKg() == null || dto.getGrossWeightKg().compareTo(BigDecimal.ZERO) <= 0) {
+//				throw new ApplicationException("Valid Gross Weight Is Required For Road Shipment");
+//			}
+//
+//			if (dto.getNoOfPackages() <= 0) {
+//				throw new ApplicationException("Number Of Packages Must Be Greater Than Zero For Road Shipment");
+//			}
+//		}
 	}
 
 	private void validatePositiveIfProvided(BigDecimal value, String fieldName) throws ApplicationException {
@@ -400,26 +407,26 @@ public class SalesServiceImpl implements SalesService {
 		);
 
 		// Sea Shipment
-		vo.setOriginPort(
-		    portRepo.findById(dto.getOriginPort())
-		        .orElseThrow(() -> new ApplicationException("Origin Port Not Found"))
-		);
-
-		vo.setDestinationPort(
-		    portRepo.findById(dto.getDestinationPort())
-		        .orElseThrow(() -> new ApplicationException("Destination Port Not Found"))
-		);
-
-		// Air Shipment
-		vo.setOriginAirport(
-		    portRepo.findById(dto.getOriginAirport())
-		        .orElseThrow(() -> new ApplicationException("Origin Airport Not Found"))
-		);
-
-		vo.setDestinationAirport(
-		    portRepo.findById(dto.getDestinationAirport())
-		        .orElseThrow(() -> new ApplicationException("Destination Airport Not Found"))
-		);
+//		vo.setOriginPort(
+//		    portRepo.findById(dto.getOriginPort())
+//		        .orElseThrow(() -> new ApplicationException("Origin Port Not Found"))
+//		);
+//
+//		vo.setDestinationPort(
+//		    portRepo.findById(dto.getDestinationPort())
+//		        .orElseThrow(() -> new ApplicationException("Destination Port Not Found"))
+//		);
+//
+//		// Air Shipment
+//		vo.setOriginAirport(
+//		    portRepo.findById(dto.getOriginAirport())
+//		        .orElseThrow(() -> new ApplicationException("Origin Airport Not Found"))
+//		);
+//
+//		vo.setDestinationAirport(
+//		    portRepo.findById(dto.getDestinationAirport())
+//		        .orElseThrow(() -> new ApplicationException("Destination Airport Not Found"))
+//		);
 
 		// Road Shipment
 		vo.setOriginTerminal(
@@ -434,7 +441,30 @@ public class SalesServiceImpl implements SalesService {
 		
 		// Cargo details
 		vo.setCargoDescription(dto.getCargoDescription());
-		vo.setCargoType(dto.getCargoType());
+		// Cargo Type
+		if (dto.getCargoType() != null) {
+		    ListOfValuesDetailsVO cargoType =
+		            listOfValuesDetailsRepo.findById(dto.getCargoType())
+		                    .orElseThrow(() ->
+		                            new RuntimeException("Cargo Type not found"));
+
+		    vo.setCargoType(cargoType);
+		} else {
+		    vo.setCargoType(null);
+		}
+
+		// Cargo Group
+		if (dto.getCargoGroup() != null) {
+		    ListOfValuesDetailsVO cargoGroup =
+		            listOfValuesDetailsRepo.findById(dto.getCargoGroup())
+		                    .orElseThrow(() ->
+		                            new RuntimeException("Cargo Group not found"));
+
+		    vo.setCargoGroup(cargoGroup);
+		} else {
+		    vo.setCargoGroup(null);
+		}
+
 		vo.setVolumeCbm(dto.getVolumeCbm());
 		vo.setGrossWeightKg(dto.getGrossWeightKg());
 		vo.setNoOfPackages(dto.getNoOfPackages());
@@ -492,48 +522,48 @@ public class SalesServiceImpl implements SalesService {
 		}
 
 
-		// Sea Shipment
-		if (vo.getOriginPort() != null) {
-		    PortResponseDetailsDTO originPort = new PortResponseDetailsDTO();
-		    originPort.setId(vo.getOriginPort().getId());
-		    originPort.setPortType(vo.getOriginPort().getPortType());
-		    originPort.setPortCode(vo.getOriginPort().getPortCode());
-		    originPort.setPortName(vo.getOriginPort().getPortName());
+//		// Sea Shipment
+//		if (vo.getOriginPort() != null) {
+//		    PortResponseDetailsDTO originPort = new PortResponseDetailsDTO();
+//		    originPort.setId(vo.getOriginPort().getId());
+//		    originPort.setPortType(vo.getOriginPort().getPortType());
+//		    originPort.setPortCode(vo.getOriginPort().getPortCode());
+//		    originPort.setPortName(vo.getOriginPort().getPortName());
+//
+//		    dto.setOriginPort(originPort);
+//		}
 
-		    dto.setOriginPort(originPort);
-		}
-
-		if (vo.getDestinationPort() != null) {
-		    PortResponseDetailsDTO destinationPort = new PortResponseDetailsDTO();
-		    destinationPort.setId(vo.getDestinationPort().getId());
-		    destinationPort.setPortType(vo.getDestinationPort().getPortType());
-		    destinationPort.setPortCode(vo.getDestinationPort().getPortCode());
-		    destinationPort.setPortName(vo.getDestinationPort().getPortName());
-
-		    dto.setDestinationPort(destinationPort);
-		}
+//		if (vo.getDestinationPort() != null) {
+//		    PortResponseDetailsDTO destinationPort = new PortResponseDetailsDTO();
+//		    destinationPort.setId(vo.getDestinationPort().getId());
+//		    destinationPort.setPortType(vo.getDestinationPort().getPortType());
+//		    destinationPort.setPortCode(vo.getDestinationPort().getPortCode());
+//		    destinationPort.setPortName(vo.getDestinationPort().getPortName());
+//
+//		    dto.setDestinationPort(destinationPort);
+//		}
 
 
-		// Air Shipment
-		if (vo.getOriginAirport() != null) {
-		    PortResponseDetailsDTO originAirport = new PortResponseDetailsDTO();
-		    originAirport.setId(vo.getOriginAirport().getId());
-		    originAirport.setPortType(vo.getOriginAirport().getPortType());
-		    originAirport.setPortCode(vo.getOriginAirport().getPortCode());
-		    originAirport.setPortName(vo.getOriginAirport().getPortName());
+//		// Air Shipment
+//		if (vo.getOriginAirport() != null) {
+//		    PortResponseDetailsDTO originAirport = new PortResponseDetailsDTO();
+//		    originAirport.setId(vo.getOriginAirport().getId());
+//		    originAirport.setPortType(vo.getOriginAirport().getPortType());
+//		    originAirport.setPortCode(vo.getOriginAirport().getPortCode());
+//		    originAirport.setPortName(vo.getOriginAirport().getPortName());
+//
+//		    dto.setOriginAirport(originAirport);
+//		}
 
-		    dto.setOriginAirport(originAirport);
-		}
-
-		if (vo.getDestinationAirport() != null) {
-		    PortResponseDetailsDTO destinationAirport = new PortResponseDetailsDTO();
-		    destinationAirport.setId(vo.getDestinationAirport().getId());
-		    destinationAirport.setPortType(vo.getDestinationAirport().getPortType());
-		    destinationAirport.setPortCode(vo.getDestinationAirport().getPortCode());
-		    destinationAirport.setPortName(vo.getDestinationAirport().getPortName());
-
-		    dto.setDestinationAirport(destinationAirport);
-		}
+//		if (vo.getDestinationAirport() != null) {
+//		    PortResponseDetailsDTO destinationAirport = new PortResponseDetailsDTO();
+//		    destinationAirport.setId(vo.getDestinationAirport().getId());
+//		    destinationAirport.setPortType(vo.getDestinationAirport().getPortType());
+//		    destinationAirport.setPortCode(vo.getDestinationAirport().getPortCode());
+//		    destinationAirport.setPortName(vo.getDestinationAirport().getPortName());
+//
+//		    dto.setDestinationAirport(destinationAirport);
+//		}
 
 
 		// Road Shipment
@@ -558,7 +588,34 @@ public class SalesServiceImpl implements SalesService {
 		}
 		
 		dto.setCargoDescription(vo.getCargoDescription());
-		dto.setCargoType(vo.getCargoType());
+		// Cargo Type
+		if (vo.getCargoType() != null) {
+		    ListOfValuesDetailsResponseDTO cargoType =
+		            new ListOfValuesDetailsResponseDTO();
+
+		    cargoType.setId(vo.getCargoType().getId());
+		    cargoType.setCode(vo.getCargoType().getValueCode());
+		    cargoType.setDescription(vo.getCargoType().getValueDescription());
+
+		    dto.setCargoType(cargoType);
+		} else {
+		    dto.setCargoType(null);
+		}
+
+		// Cargo Group
+		if (vo.getCargoGroup() != null) {
+		    ListOfValuesDetailsResponseDTO cargoGroup =
+		            new ListOfValuesDetailsResponseDTO();
+
+		    cargoGroup.setId(vo.getCargoGroup().getId());
+		    cargoGroup.setCode(vo.getCargoGroup().getValueCode());
+		    cargoGroup.setDescription(vo.getCargoGroup().getValueDescription());
+
+		    dto.setCargoGroup(cargoGroup);
+		} else {
+		    dto.setCargoGroup(null);
+		}
+
 		dto.setVolumeCbm(vo.getVolumeCbm());
 		dto.setGrossWeightKg(vo.getGrossWeightKg());
 		dto.setNoOfPackages(vo.getNoOfPackages());
@@ -833,6 +890,8 @@ public class SalesServiceImpl implements SalesService {
 		quotationVO.setExpirationDate(dto.getExpirationDate());
 		quotationVO.setCompanyName(dto.getCompanyName());
 		quotationVO.setAgentName(dto.getAgentName());
+		quotationVO.setShipmentMode(dto.getShipmentMode());
+		quotationVO.setMovement(dto.getMovement());
 
 		// Origin City
 		quotationVO.setOriginCity(
@@ -1112,6 +1171,8 @@ public class SalesServiceImpl implements SalesService {
         dto.setEnquiryDate(vo.getEnquiryDate());
         dto.setCompanyName(vo.getCompanyName());
 		dto.setAgentName(vo.getAgentName());
+		dto.setMovement(vo.getMovement());
+		dto.setShipmentMode(vo.getShipmentMode());
 
 		// Origin City
 		if (vo.getOriginCity() != null) {
@@ -1472,6 +1533,9 @@ public class SalesServiceImpl implements SalesService {
 	    if (!StringUtils.hasText(dto.getCustomer())) {
 	        throw new ApplicationException("Customer Is Required");
 	    }
+	    if (!StringUtils.hasText(dto.getType())) {
+	        throw new ApplicationException(" Type Is Required");
+	    }
 	    if (!StringUtils.hasText(dto.getBookingType())) {
 	        throw new ApplicationException("Booking Type Is Required");
 	    }
@@ -1484,6 +1548,10 @@ public class SalesServiceImpl implements SalesService {
 
 	    // ---------- header ----------
 	    vo.setBookingType(dto.getBookingType());
+	    vo.setType(dto.getType());
+	    vo.setQuotationNo(dto.getQuotationNo());
+	    vo.setQuotationDate(dto.getQuotationDate());
+
 	    vo.setTransportMode(dto.getTransportMode());
 	    vo.setServiceType(dto.getServiceType());
 	    vo.setCustomer(dto.getCustomer());
@@ -1518,8 +1586,23 @@ public class SalesServiceImpl implements SalesService {
 	        for (BookingRoutingDTO c : dto.getRoutingDetails()) {
 	            BookingRoutingVO child = new BookingRoutingVO();
 	            child.setPlaceOfReceipt(c.getPlaceOfReceipt());
-	            child.setOrigin(c.getOrigin());
-	            child.setDestination(c.getDestination());
+	            // Origin port normalization
+	            if (c.getOriginPort() != null ) {
+	                PortVO origin = portRepo.findById(c.getOriginPort())
+	                        .orElseThrow(() -> new RuntimeException(
+	                                "Origin port not found: " + c.getOriginPort()));
+
+	                child.setOriginPort(origin);
+	            }
+
+	            // Destination port normalization
+	            if (c.getDestinationPort() != null ) {
+	                PortVO destination = portRepo.findById(c.getDestinationPort())
+	                        .orElseThrow(() -> new RuntimeException(
+	                                "Destination port not found: " + c.getDestinationPort()));
+
+	                child.setDestinationPort(destination);
+	            }
 	            child.setPlaceOfDelivery(c.getPlaceOfDelivery());
 	            child.setRequestedETD(c.getRequestedETD());
 	            child.setRequestedETA(c.getRequestedETA());
@@ -1793,6 +1876,11 @@ public class SalesServiceImpl implements SalesService {
 	    dto.setDocId(vo.getDocId());
 	    dto.setDocDate(vo.getDocDate());
 	    dto.setBookingType(vo.getBookingType());
+	    
+	    dto.setType(vo.getType());
+	    dto.setQuotationNo(vo.getQuotationNo());
+	    dto.setQuotationDate(vo.getQuotationDate());
+
 	    dto.setTransportMode(vo.getTransportMode());
 	    dto.setServiceType(vo.getServiceType());
 	    dto.setCustomer(vo.getCustomer());
@@ -1823,8 +1911,28 @@ public class SalesServiceImpl implements SalesService {
 	            BookingRoutingResponseDTO r = new BookingRoutingResponseDTO();
 	            r.setId(child.getId());
 	            r.setPlaceOfReceipt(child.getPlaceOfReceipt());
-	            r.setOrigin(child.getOrigin());
-	            r.setDestination(child.getDestination());
+	         // Origin mapping
+	            if (child.getOriginPort() != null) {
+	                PortResponseDetailsDTO origin = new PortResponseDetailsDTO();
+	                origin.setId(child.getOriginPort().getId());
+	                origin.setPortType(child.getOriginPort().getPortType());
+	                origin.setPortCode(child.getOriginPort().getPortCode());
+	                origin.setPortName(child.getOriginPort().getPortName());
+
+	                r.setOrigin(origin);
+	            }
+
+	            // Destination mapping
+	            if (child.getDestinationPort() != null) {
+	                PortResponseDetailsDTO destination = new PortResponseDetailsDTO();
+	                destination.setId(child.getDestinationPort().getId());
+	                destination.setPortType(child.getDestinationPort().getPortType());
+	                destination.setPortCode(child.getDestinationPort().getPortCode());
+	                destination.setPortName(child.getDestinationPort().getPortName());
+
+	                r.setDestination(destination);
+	            }
+
 	            r.setPlaceOfDelivery(child.getPlaceOfDelivery());
 	            r.setRequestedETD(child.getRequestedETD());
 	            r.setRequestedETA(child.getRequestedETA());

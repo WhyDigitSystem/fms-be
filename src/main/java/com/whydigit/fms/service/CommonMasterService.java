@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +25,7 @@ import com.whydigit.fms.dto.DocumentTypeMappingDTO;
 import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
 import com.whydigit.fms.dto.GlobalParameterDTO;
+import com.whydigit.fms.dto.ListOfValuesDTO;
 import com.whydigit.fms.dto.ModeMasterDTO;
 import com.whydigit.fms.dto.ScreenNamesDTO;
 import com.whydigit.fms.dto.StateDTO;
@@ -35,6 +38,7 @@ import com.whydigit.fms.entity.DesignationVO;
 import com.whydigit.fms.entity.DocumentTypeMasterVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
+import com.whydigit.fms.entity.ListOfValuesVO;
 import com.whydigit.fms.entity.ModeMasterVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
 import com.whydigit.fms.entity.UserProfileInformationVO;
@@ -186,6 +190,14 @@ public interface CommonMasterService {
 
 
 
+
+	Map<String, Object> updateCreateListOfValues(@Valid ListOfValuesDTO dto) throws ApplicationException;
+
+	ListOfValuesVO getListOfValuesById(Long id);
+
+	List<ListOfValuesVO> getListOfValuesByOrgId(Long orgId, Long branchCode);
+
+	List<Map<String, Object>> getBudgetGroup(Long orgId, String listDescription) throws ApplicationException;
 
 
 }

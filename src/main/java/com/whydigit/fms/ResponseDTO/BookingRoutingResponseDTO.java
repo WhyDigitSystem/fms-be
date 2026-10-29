@@ -15,8 +15,8 @@ public class BookingRoutingResponseDTO {
     private Long id;
 
     private String placeOfReceipt;
-    private String origin;
-    private String destination;
+    private PortResponseDetailsDTO origin;
+    private PortResponseDetailsDTO destination;
     private String placeOfDelivery;
 
     private LocalDate requestedETD;

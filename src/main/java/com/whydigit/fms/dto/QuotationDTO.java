@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,20 +23,24 @@ public class QuotationDTO {
 	private LocalDate expirationDate;
 	private String companyName;
 	private String agentName;
+	private String movement; // Import / Export
 
-    private String enquiryNo;
-    private LocalDate enquiryDate;
+	// Shipment Mode
+	private String shipmentMode; // Sea / Air / Road
+
+	private String enquiryNo;
+	private LocalDate enquiryDate;
 	// Route
-    private Long originCity;
+	private Long originCity;
 
-    // Destination City
-    private Long destinationCity;
+	// Destination City
+	private Long destinationCity;
 
-    // Origin Port
-    private Long originPort;
+	// Origin Port
+	private Long originPort;
 
-    // Destination Port
-    private Long destinationPort;
+	// Destination Port
+	private Long destinationPort;
 
 	// Commercial Information
 	private String paymentTerms;

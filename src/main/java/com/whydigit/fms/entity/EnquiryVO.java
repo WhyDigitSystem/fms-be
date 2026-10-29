@@ -63,26 +63,25 @@ public class EnquiryVO {
 
 
     // Sea Shipment
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origin_port")
-    private PortVO originPort;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_port")
-    private PortVO destinationPort;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "origin_port")
+//    private PortVO originPort;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "destination_port")
+//    private PortVO destinationPort;
 
 
     // Air Shipment
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origin_airport")
-    private PortVO originAirport;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "origin_airport")
+//    private PortVO originAirport;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "destination_airport")
+//    private PortVO destinationAirport;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_airport")
-    private PortVO destinationAirport;
 
-
-    // Road Shipment
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_terminal")
     private PortVO originTerminal;
@@ -96,9 +95,15 @@ public class EnquiryVO {
     @Column(name = "cargo_description")
     private String cargoDescription;
 
-    @Column(name = "cargo_type")
-    private String cargoType; // LCL / FCL, etc.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cargo_type")
+    private ListOfValuesDetailsVO cargoType;
 
+    // Cargo Group
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cargo_group")
+    private ListOfValuesDetailsVO cargoGroup;
+    
     @Column(name = "volume_cbm", precision = 15, scale = 3)
     private BigDecimal volumeCbm;
 

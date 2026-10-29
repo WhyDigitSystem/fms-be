@@ -16,9 +16,9 @@ public class BookingRoutingDTO {
 
     private String placeOfReceipt;
 
-    private String origin;
+    private Long originPort;
 
-    private String destination;
+    private Long destinationPort;
 
     private String placeOfDelivery;
 

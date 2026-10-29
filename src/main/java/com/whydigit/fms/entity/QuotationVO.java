@@ -60,6 +60,12 @@ public class QuotationVO {
     @Column(name = "agent_name", length = 100)
     private String agentName;
 
+    @Column(name = "movement")
+    private String movement; // Import / Export
+
+    // Shipment Mode
+    @Column(name = "shipment_mode")
+    private String shipmentMode; // Sea / Air / Road
     // Route
 
  // Origin City

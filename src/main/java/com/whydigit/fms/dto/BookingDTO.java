@@ -2,6 +2,7 @@ package com.whydigit.fms.dto;
 
 
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,11 @@ public class BookingDTO {
     private Long id;
 
     private String bookingType;
+    
+    private String type;
+
+   	private String quotationNo;
+   	private LocalDate quotationDate;
 
     private String transportMode;
 

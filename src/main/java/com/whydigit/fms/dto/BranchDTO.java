@@ -1,5 +1,7 @@
 package com.whydigit.fms.dto;
 
+import javax.persistence.Column;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,11 @@ public class BranchDTO {
 	private String branchCode;
 	
 	private Long orgId;
+	
+	private String type;
+
+	private String quotationNo;
+	private String quotationDate;
 	
 	private String addressLine1;
 	

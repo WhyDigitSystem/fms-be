@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -41,6 +42,8 @@ import com.whydigit.fms.dto.DocumentTypeMappingDetailsDTO;
 import com.whydigit.fms.dto.DocumentTypeMasterDTO;
 import com.whydigit.fms.dto.FinancialYearDTO;
 import com.whydigit.fms.dto.GlobalParameterDTO;
+import com.whydigit.fms.dto.ListOfValuesDTO;
+import com.whydigit.fms.dto.ListOfValuesDetailsDTO;
 import com.whydigit.fms.dto.ModeMasterDTO;
 import com.whydigit.fms.dto.Role;
 import com.whydigit.fms.dto.ScreenNamesDTO;
@@ -59,6 +62,8 @@ import com.whydigit.fms.entity.DocumentTypeMasterVO;
 import com.whydigit.fms.entity.EmployeeVO;
 import com.whydigit.fms.entity.FinancialYearVO;
 import com.whydigit.fms.entity.GlobalParameterVO;
+import com.whydigit.fms.entity.ListOfValuesDetailsVO;
+import com.whydigit.fms.entity.ListOfValuesVO;
 import com.whydigit.fms.entity.ModeMasterVO;
 import com.whydigit.fms.entity.ScreenNamesVO;
 import com.whydigit.fms.entity.StateVO;
@@ -78,6 +83,8 @@ import com.whydigit.fms.repo.DocumentTypeMasterRepo;
 import com.whydigit.fms.repo.EmployeeRepo;
 import com.whydigit.fms.repo.FinancialYearRepo;
 import com.whydigit.fms.repo.GlobalParameterRepo;
+import com.whydigit.fms.repo.ListOfValuesDetailsRepo;
+import com.whydigit.fms.repo.ListOfValuesRepo;
 import com.whydigit.fms.repo.ModeMasterRepo;
 import com.whydigit.fms.repo.ScreenNamesRepo;
 import com.whydigit.fms.repo.StateRepo;
@@ -153,6 +160,12 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 
 	@Autowired
 	private ModeMasterRepo modeMasterRepo;
+	
+	@Autowired
+	ListOfValuesRepo listOfValuesRepo;
+	
+	@Autowired
+	ListOfValuesDetailsRepo listOfValuesDetailsRepo;
 
 	// Country
 
@@ -1810,5 +1823,130 @@ public class CommonMasterServiceImpl implements CommonMasterService {
 	        modeMasterVO.setCancelRemarks(modeMasterDTO.getCancelRemarks());
 	    }
 	    
+	    
+	    @Override
+		@Transactional
+		public Map<String, Object> updateCreateListOfValues(@Valid ListOfValuesDTO dto) throws ApplicationException {
+
+			ListOfValuesVO listVO = new ListOfValuesVO();
+			String message;
+
+			if (ObjectUtils.isNotEmpty(dto.getId())) {
+
+				listVO = listOfValuesRepo.findById(dto.getId())
+						.orElseThrow(() -> new ApplicationException("List Of Values Not Found"));
+
+				listVO.setUpdatedBy(dto.getCreatedBy());
+
+				if (!listVO.getListCode().equalsIgnoreCase(dto.getListCode())) {
+
+					if (listOfValuesRepo.existsByListCodeAndOrgId(dto.getListCode(), dto.getOrgId())) {
+
+						throw new ApplicationException("List Code already exists.");
+					}
+				}
+
+				createUpdateListVO(dto, listVO);
+
+				message = "List Of Values Updated Successfully";
+
+			} else {
+
+				if (listOfValuesRepo.existsByListCodeAndOrgId(dto.getListCode(), dto.getOrgId())) {
+
+					throw new ApplicationException("List Code already exists.");
+				}
+
+				listVO.setCreatedBy(dto.getCreatedBy());
+				listVO.setUpdatedBy(dto.getCreatedBy());
+
+				createUpdateListVO(dto, listVO);
+
+				message = "List Of Values Created Successfully";
+			}
+
+			listVO = listOfValuesRepo.save(listVO);
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("message", message);
+			response.put("listOfValuesVO", listVO);
+
+			return response;
+		}
+
+		private void createUpdateListVO(ListOfValuesDTO dto, ListOfValuesVO listVO) throws ApplicationException {
+
+			listVO.setListCode(dto.getListCode().toUpperCase());
+			listVO.setListDescription(dto.getListDescription().toUpperCase());
+			listVO.setOrgId(dto.getOrgId());
+			listVO.setActive(dto.isActive());
+			listVO.setCancelRemarks(dto.getCancelRemarks());
+
+			if (dto.getBranch() != null && dto.getBranch() != 0) {
+
+				BranchVO branch = branchRepo.findById(dto.getBranch())
+						.orElseThrow(() -> new ApplicationException("Branch Not Found"));
+
+				listVO.setBranch(branch);
+			}
+
+			List<ListOfValuesDetailsVO> detailList = new ArrayList<>();
+
+			for (ListOfValuesDetailsDTO detailDTO : dto.getDetails()) {
+
+				ListOfValuesDetailsVO detailVO = null;
+
+				if (detailDTO.getId() != null) {
+
+					detailVO = listOfValuesDetailsRepo.findById(detailDTO.getId()).orElse(null);
+				}
+
+				if (detailVO == null) {
+
+					detailVO = new ListOfValuesDetailsVO();
+				}
+
+				detailVO.setValueCode(detailDTO.getValueCode());
+				detailVO.setValueDescription(detailDTO.getValueDescription());
+				detailVO.setActive(detailDTO.isActive());
+				detailVO.setListOfValuesVO(listVO);
+
+				detailList.add(detailVO);
+			}
+
+			listVO.setListOfValuesDetailsVO(detailList);
+		}
+
+		@Override
+		public ListOfValuesVO getListOfValuesById(Long id) {
+
+			return listOfValuesRepo.getListOfValuesById(id);
+
+		}
+
+		@Override
+		public List<ListOfValuesVO> getListOfValuesByOrgId(Long orgId, Long branchId) {
+
+			return listOfValuesRepo.getListOfValuesByOrgId(orgId, branchId);
+		}
+		
+		@Override
+		public List<Map<String, Object>> getBudgetGroup(Long orgId, String name) throws ApplicationException {
+
+			Set<Object[]> obj = listOfValuesRepo.getListValuesDetailsForBudget(orgId, name);
+			return ListofValue(obj);
+		}
+
+		private List<Map<String, Object>> ListofValue(Set<Object[]> obj) {
+			List<Map<String, Object>> details = new ArrayList<>();
+			for (Object[] det : obj) {
+				Map<String, Object> mp = new HashMap<>();
+				mp.put("id", det[0] != null ? det[0].toString() : "");
+				mp.put("valuesDescription", det[1] != null ? det[1].toString() : "");
+				details.add(mp);
+			}
+			return details;
+		}
+
 
 }
