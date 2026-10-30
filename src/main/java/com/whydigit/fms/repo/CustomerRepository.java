@@ -17,5 +17,9 @@ public interface CustomerRepository extends JpaRepository<CustomerVO, Long> {
     List<CustomerVO> findByOrgIdAndCancelFalse(Long orgId);
 
     List<CustomerVO> findByOrgIdAndBranch_Id(Long orgId, Long branchId);
+    
+    boolean existsByCustomerCode(String customerCode);
+
+    boolean existsByCustomerCodeAndIdNot(String customerCode, Long id);
  
 }

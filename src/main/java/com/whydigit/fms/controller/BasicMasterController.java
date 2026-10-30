@@ -469,41 +469,100 @@ public class BasicMasterController extends BaseController {
 		return ResponseEntity.ok(responseDTO);
 	}
 
-	// =========================================================
 	// CREATE / UPDATE CUSTOMER
-	// =========================================================
-
 	@PutMapping("/createUpdateCustomer")
-	public ResponseEntity<Map<String, Object>> createUpdateCustomer(@RequestBody CustomerDTO customerDTO) {
 
-		Map<String, Object> response = basicMasterService.createUpdateCustomer(customerDTO);
+	public ResponseEntity<ResponseDTO> createUpdateCustomer(@RequestBody CustomerDTO customerDTO) {
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		String methodName = "createUpdateCustomer()";
+
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			Map<String, Object> customerResult = basicMasterService.createUpdateCustomer(customerDTO);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, customerResult.get("message"));
+
+			responseObjectsMap.put("customerVO", customerResult.get("customerVO"));
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage(), e);
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Customer processing failed", e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
 	}
 
-	// =========================================================
 	// GET CUSTOMER BY ID
-	// =========================================================
+	@GetMapping("/getByCustomerId")
+	public ResponseEntity<ResponseDTO> getCustomerById(@RequestParam Long id) {
 
-	@GetMapping("getByCustomerId")
-	public ResponseEntity<CustomerResponseDTO> getCustomerById(@RequestParam Long id) {
+		String methodName = "getCustomerById()";
 
-		CustomerResponseDTO response = basicMasterService.getCustomerById(id);
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			CustomerResponseDTO customerResponse = basicMasterService.getCustomerById(id);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Customer retrieved successfully");
+
+			responseObjectsMap.put("customerVO", customerResponse);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage(), e);
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Customer retrieval failed", e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
 	}
 
-	// =========================================================
-	// GET CUSTOMERS BY Branch AND ORGANIZATION ID
-	// =========================================================
-
+	// GET CUSTOMERS BY BRANCH AND ORGANIZATION ID
 	@GetMapping("/getByCustomerByBranchAndOrgId")
-	public ResponseEntity<List<CustomerResponseDTO>> getCustomersByBranchAndOrgId(@RequestParam Long orgId,
-			@RequestParam Long branchId) {
+	public ResponseEntity<ResponseDTO> getCustomersByBranchAndOrgId(@RequestParam Long orgId,
+			@RequestParam Long branch) {
 
-		List<CustomerResponseDTO> response = basicMasterService.getCustomersByBranchAndOrgId(orgId, branchId);
+		String methodName = "getCustomersByBranchAndOrgId()";
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			List<CustomerResponseDTO> customerResponses = basicMasterService.getCustomersByBranchAndOrgId(orgId,
+					branch);
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Customers retrieved successfully");
+
+			responseObjectsMap.put("customerVO", customerResponses);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage(), e);
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Customer retrieval failed", e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
 	}
 
 }

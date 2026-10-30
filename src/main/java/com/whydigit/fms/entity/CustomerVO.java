@@ -45,6 +45,9 @@ public class CustomerVO {
 	@JoinColumn(name = "branch")
 	private BranchVO branch;
 
+	@Column(name = "customer_code", nullable = false, unique = true, length = 20)
+	private String customerCode;
+	
 	@Column(name = "customer_name", length = 200)
 	private String customerName;
 
