@@ -919,6 +919,7 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 		return configs.stream().map(this::convertConfigToResponseDTO).collect(Collectors.toList());
 	}
 
+	//CREATE UPDATE CUSTOMER
 	@Override
 	@Transactional
 	public Map<String, Object> createUpdateCustomer(CustomerDTO customerDTO) {
@@ -1326,6 +1327,7 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 		return responseDTO;
 	}
 
+	
 	@Override
 	@Transactional(readOnly = true)
 	public CustomerResponseDTO getCustomerById(Long id) {
