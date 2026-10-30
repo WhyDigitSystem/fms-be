@@ -27,6 +27,8 @@ public class CustomerDTO {
     private String pan;
 
     private String industryType;
+    
+    private String customerCode;
 
     private boolean active;
 

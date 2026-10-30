@@ -535,7 +535,7 @@ public class BasicMasterController extends BaseController {
 	// GET CUSTOMERS BY BRANCH AND ORGANIZATION ID
 	@GetMapping("/getByCustomerByBranchAndOrgId")
 	public ResponseEntity<ResponseDTO> getCustomersByBranchAndOrgId(@RequestParam Long orgId,
-			@RequestParam Long branchId) {
+			@RequestParam Long branch) {
 
 		String methodName = "getCustomersByBranchAndOrgId()";
 
@@ -546,7 +546,7 @@ public class BasicMasterController extends BaseController {
 
 		try {
 			List<CustomerResponseDTO> customerResponses = basicMasterService.getCustomersByBranchAndOrgId(orgId,
-					branchId);
+					branch);
 
 			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Customers retrieved successfully");
 

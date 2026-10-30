@@ -919,7 +919,7 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 		return configs.stream().map(this::convertConfigToResponseDTO).collect(Collectors.toList());
 	}
 
-	//CREATE UPDATE CUSTOMER
+	// CREATE UPDATE CUSTOMER
 	@Override
 	@Transactional
 	public Map<String, Object> createUpdateCustomer(CustomerDTO customerDTO) {
@@ -933,23 +933,52 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 		if (customerDTO.getId() == null) {
 
-			// Create new customer
-			customerVO = new CustomerVO();
+		    // CREATE CUSTOMER
+		    customerVO = new CustomerVO();
 
-			customerVO.setCreatedBy(customerDTO.getCreatedBy());
-			customerVO.setUpdatedBy(customerDTO.getCreatedBy());
+		    String generatedCustomerCode = generateCustomerCode();
 
-			message = "Customer Creation Successfully";
+		    if (customerRepository.existsByCustomerCode(generatedCustomerCode)) {
+		        throw new RuntimeException(
+		                "Customer code already exists: " + generatedCustomerCode);
+		    }
+
+		    customerVO.setCustomerCode(generatedCustomerCode);
+		    customerVO.setCreatedBy(customerDTO.getCreatedBy());
+		    customerVO.setUpdatedBy(customerDTO.getCreatedBy());
+
+		    message = "Customer Creation Successfully";
 
 		} else {
 
-			// Update existing customer
-			customerVO = customerRepository.findById(customerDTO.getId())
-					.orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerDTO.getId()));
+		    // UPDATE EXISTING CUSTOMER
+		    customerVO = customerRepository.findById(customerDTO.getId())
+		            .orElseThrow(() -> new RuntimeException(
+		                    "Customer not found with id: " + customerDTO.getId()));
 
-			customerVO.setUpdatedBy(customerDTO.getCreatedBy());
+		    // Keep the existing customer code unchanged.
+		    String existingCustomerCode = customerVO.getCustomerCode();
+		    String requestedCustomerCode = customerDTO.getCustomerCode();
 
-			message = "Customer Updation Successfully";
+		    if (requestedCustomerCode != null
+		            && !requestedCustomerCode.trim().isEmpty()
+		            && !requestedCustomerCode.equals(existingCustomerCode)) {
+
+		        if (customerRepository.existsByCustomerCodeAndIdNot(
+		                requestedCustomerCode, customerDTO.getId())) {
+
+		            throw new RuntimeException(
+		                    "Customer code already exists: " + requestedCustomerCode);
+		        }
+
+		        throw new RuntimeException(
+		                "Customer code cannot be changed during update. Existing code: "
+		                        + existingCustomerCode);
+		    }
+
+		    customerVO.setUpdatedBy(customerDTO.getCreatedBy());
+
+		    message = "Customer Updation Successfully";
 		}
 
 		// ==========================================
@@ -1108,6 +1137,7 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 		responseDTO.setId(savedCustomer.getId());
 		responseDTO.setOrgId(savedCustomer.getOrgId());
+		responseDTO.setCustomerCode(savedCustomer.getCustomerCode());
 		responseDTO.setCustomerName(savedCustomer.getCustomerName());
 		responseDTO.setCustomerType(savedCustomer.getCustomerType());
 		responseDTO.setGstin(savedCustomer.getGstin());
@@ -1233,6 +1263,7 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 		responseDTO.setId(customerVO.getId());
 		responseDTO.setOrgId(customerVO.getOrgId());
 		responseDTO.setCustomerName(customerVO.getCustomerName());
+		responseDTO.setCustomerCode(customerVO.getCustomerCode());
 		responseDTO.setCustomerType(customerVO.getCustomerType());
 		responseDTO.setGstin(customerVO.getGstin());
 		responseDTO.setPan(customerVO.getPan());
@@ -1327,7 +1358,26 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 		return responseDTO;
 	}
 
-	
+	private String generateCustomerCode() {
+
+		String prefix = "CUS-";
+
+		List<CustomerVO> customers = customerRepository.findAll();
+
+		int maxNumber = customers.stream().map(CustomerVO::getCustomerCode)
+				.filter(code -> code != null && code.matches("CUS-\\d+"))
+				.map(code -> Integer.parseInt(code.substring(4))).max(Integer::compareTo).orElse(0);
+
+		String nextCode;
+
+		do {
+			maxNumber++;
+			nextCode = prefix + String.format("%03d", maxNumber);
+		} while (customerRepository.existsByCustomerCode(nextCode));
+
+		return nextCode;
+	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public CustomerResponseDTO getCustomerById(Long id) {

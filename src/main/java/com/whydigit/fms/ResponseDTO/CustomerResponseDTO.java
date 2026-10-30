@@ -20,6 +20,8 @@ public class CustomerResponseDTO {
 
     private BranchResponsesDTO branch;
 
+    private String customerCode;
+
     private String customerName;
 
     private String customerType;
