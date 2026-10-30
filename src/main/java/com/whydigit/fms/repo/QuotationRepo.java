@@ -1,6 +1,7 @@
 package com.whydigit.fms.repo;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,5 +24,21 @@ public interface QuotationRepo extends JpaRepository<QuotationVO, Long>{
 	        @Param("orgId") Long orgId,
 	        @Param("branch") Long branch
 	);
+
+	@Query(value = " SELECT\r\n"
+			+ "    CONCAT(\r\n"
+			+ "        SUBSTRING_INDEX(:docId, '-', 1),\r\n"
+			+ "        '-',\r\n"
+			+ "        COALESCE(MAX(q.revision_no), 1) + 1\r\n"
+			+ "    ) AS docId,\r\n"
+			+ "    COALESCE(MAX(q.revision_no), 1) + 1 AS revisionNo\r\n"
+			+ "FROM quotation q\r\n"
+			+ "WHERE q.doc_id = SUBSTRING_INDEX(:docId, '-', 1)\r\n"
+			+ "   OR q.doc_id LIKE CONCAT(SUBSTRING_INDEX(:docId, '-', 1), '-%');\r\n"
+			+ "   \r\n"
+			+ "",
+            nativeQuery = true)
+    Map<String, Object> getNextQuotationRevision(@Param("docId") String docId);
+
 
 }

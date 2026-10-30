@@ -47,5 +47,7 @@ public interface SalesService {
 
 	ResponseEntity<byte[]> viewBookingFile(HttpServletRequest request) throws IOException;
 
+	Map<String, Object> getNextQuotationRevision(String docId)throws ApplicationException;
+
 
 }

@@ -5,13 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -541,6 +539,49 @@ public class SalesController extends BaseController {
 	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
 	    return ResponseEntity.ok(responseDTO);
 	}
+	
+	
+	@GetMapping("/getNextQuotationRevision")
+	public ResponseEntity<ResponseDTO> getNextQuotationRevision(
+	        @RequestParam String docId) {
+
+	    String methodName = "getNextQuotationRevision()";
+	    LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+	    String errorMsg = null;
+	    Map<String, Object> responseObjectsMap = new HashMap<>();
+	    ResponseDTO responseDTO = null;
+	    Map<String, Object> revisionDetails = new HashMap<>();
+
+	    try {
+	        revisionDetails = salesService.getNextQuotationRevision(docId);
+	    } catch (Exception e) {
+	        errorMsg = e.getMessage();
+	        LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, errorMsg);
+	    }
+
+	    if (errorMsg == null || errorMsg.trim().isEmpty()) {
+
+	        responseObjectsMap.put(CommonConstant.STRING_MESSAGE,
+	                "Quotation revision information retrieved successfully");
+
+	        responseObjectsMap.put("docId", revisionDetails.get("docId"));
+	        responseObjectsMap.put("revisionNo", revisionDetails.get("revisionNo"));
+
+	        responseDTO = createServiceResponse(responseObjectsMap);
+
+	    } else {
+	        responseDTO = createServiceResponseError(
+	                responseObjectsMap,
+	                "Quotation revision information retrieval failed",
+	                errorMsg);
+	    }
+
+	    LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+	    return ResponseEntity.ok().body(responseDTO);
+	}
+	
 	
 	
 	 

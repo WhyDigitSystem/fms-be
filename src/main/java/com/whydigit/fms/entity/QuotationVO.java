@@ -92,6 +92,8 @@ public class QuotationVO {
     @Column(name = "payment_terms", length = 100, nullable = false)
     private String paymentTerms;
 
+    @Column(name = "revision_no")
+    private int revisionNo;
     @Column(name = "incoterm", length = 10, nullable = false)
     private String incoterm;
 

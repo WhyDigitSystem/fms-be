@@ -715,33 +715,58 @@ public class SalesServiceImpl implements SalesService {
 		// CREATE
 		// =====================================================
 
-		if (ObjectUtils.isEmpty(dto.getId())) {
+			if (ObjectUtils.isEmpty(dto.getId())) {
 
-			quotationVO = new QuotationVO();
+			    // CREATE
+			    quotationVO = new QuotationVO();
+			    String docId;
 
-			String docId = quotationRepo.getQuotationDocId(dto.getOrgId(), screenCode);
+			    if (dto.getDocId() == null || !StringUtils.hasText(dto.getDocId())
+			            || "null".equalsIgnoreCase(dto.getDocId())) {
+					 screenCode = "QUO";
 
-			if (!StringUtils.hasText(docId)) {
-				throw new ApplicationException("Quotation Document ID Generation Failed");
-			}
+			        // Generate a new quotation number
+			        docId = quotationRepo.getQuotationDocId(
+			                dto.getOrgId(), screenCode);
 
-			quotationVO.setDocId(docId);
 
-			DocumentTypeMappingDetailsVO documentTypeMappingDetailsVO = documentTypeMappingDetailsRepo
-					.findByOrgIdAndScreenCode(dto.getOrgId(), screenCode);
+			        DocumentTypeMappingDetailsVO documentTypeMappingDetailsVO =
+			                documentTypeMappingDetailsRepo
+			                        .findByOrgIdAndScreenCode(
+			                                dto.getOrgId(), screenCode);
 
-			if (documentTypeMappingDetailsVO != null) {
-				documentTypeMappingDetailsVO.setLastNo(documentTypeMappingDetailsVO.getLastNo() + 1);
+			        documentTypeMappingDetailsVO.setLastNo(
+		                    documentTypeMappingDetailsVO.getLastNo() + 1);
 
-				documentTypeMappingDetailsRepo.save(documentTypeMappingDetailsVO);
-			}
+		            documentTypeMappingDetailsRepo.save(
+		                    documentTypeMappingDetailsVO);
 
-			quotationVO.setCreatedBy(dto.getCreatedBy());
-			quotationVO.setUpdatedBy(dto.getCreatedBy());
+		            if (documentTypeMappingDetailsVO == null) {
+		                throw new ApplicationException(
+		                        "Quotation document mapping details not found");
+		            }
+			        quotationVO.setRevisionNo(1);
+			    	quotationVO.setDocId(docId);
+			    	message = "Quotation Created Successfully";
 
-			message = "Quotation Created Successfully";
 
-		} else {
+			    } 
+			    else {
+			    	// Existing quotation: create a new revision
+			    	
+			    	
+				    quotationVO.setDocId(dto.getDocId());
+				    quotationVO.setRevisionNo(dto.getRevisionNo());
+				    
+			    	message = "Quotation Revised Successfully";
+
+
+			} 
+			    quotationVO.setCreatedBy(dto.getCreatedBy());
+		    	quotationVO.setUpdatedBy(dto.getCreatedBy());
+
+		    	
+			}else {
 
 			// =================================================
 			// UPDATE
@@ -2543,4 +2568,34 @@ public class SalesServiceImpl implements SalesService {
     }
 
     
+    @Override
+    public Map<String, Object> getNextQuotationRevision(String docId) throws ApplicationException {
+
+        if (docId == null || docId.trim().isEmpty()
+                || "null".equalsIgnoreCase(docId.trim())) {
+            throw new ApplicationException("Quotation docId is required");
+        }
+
+        Map<String, Object> revisionData =
+                quotationRepo.getNextQuotationRevision(docId.trim());
+
+        if (revisionData == null) {
+            throw new ApplicationException("Quotation revision information not found");
+        }
+
+        System.out.println("Revision Data: " + revisionData);
+
+        Object nextDocId = revisionData.get("docId");
+        Object revisionNo = revisionData.get("revisionNo");
+
+        if (nextDocId == null || revisionNo == null) {
+            throw new ApplicationException("Quotation revision information not found");
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("docId", nextDocId);
+        result.put("revisionNo", revisionNo);
+
+        return result;
+    }
 }

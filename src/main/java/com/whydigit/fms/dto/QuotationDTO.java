@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +15,8 @@ public class QuotationDTO {
 
 	private Long id;
 
+	private String docId;
+
 	// Quotation Information
 //    private String docId;
 //    private LocalDate docDate;
@@ -24,6 +24,7 @@ public class QuotationDTO {
 	private String companyName;
 	private String agentName;
 	private String movement; // Import / Export
+	private int revisionNo;
 
 	// Shipment Mode
 	private String shipmentMode; // Sea / Air / Road
