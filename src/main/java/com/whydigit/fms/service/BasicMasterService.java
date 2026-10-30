@@ -51,4 +51,6 @@ public interface BasicMasterService {
 	CustomerResponseDTO getCustomerById(Long id);
 
 	List<CustomerResponseDTO> getCustomersByBranchAndOrgId(Long orgId, Long branchId);
+	
+	String getNextCustomerCode();
 }

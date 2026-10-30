@@ -21,5 +21,7 @@ public interface CustomerRepository extends JpaRepository<CustomerVO, Long> {
     boolean existsByCustomerCode(String customerCode);
 
     boolean existsByCustomerCodeAndIdNot(String customerCode, Long id);
+    
+    
  
 }

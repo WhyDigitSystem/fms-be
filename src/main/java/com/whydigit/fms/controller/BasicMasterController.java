@@ -565,4 +565,34 @@ public class BasicMasterController extends BaseController {
 		return ResponseEntity.ok(responseDTO);
 	}
 
+	// GET NEXT CUSTOMER CODE
+	@GetMapping("/getNextCustomerCode")
+	public ResponseEntity<ResponseDTO> getNextCustomerCode() {
+
+		String methodName = "getNextCustomerCode()";
+		LOGGER.debug(CommonConstant.STARTING_METHOD, methodName);
+
+		Map<String, Object> responseObjectsMap = new HashMap<>();
+		ResponseDTO responseDTO;
+
+		try {
+			String customerCode = basicMasterService.getNextCustomerCode();
+
+			responseObjectsMap.put(CommonConstant.STRING_MESSAGE, "Next customer code retrieved successfully");
+			responseObjectsMap.put("customerCode", customerCode);
+
+			responseDTO = createServiceResponse(responseObjectsMap);
+
+		} catch (Exception e) {
+			LOGGER.error(UserConstants.ERROR_MSG_METHOD_NAME, methodName, e.getMessage(), e);
+
+			responseDTO = createServiceResponseError(responseObjectsMap, "Failed to retrieve next customer code",
+					e.getMessage());
+		}
+
+		LOGGER.debug(CommonConstant.ENDING_METHOD, methodName);
+
+		return ResponseEntity.ok(responseDTO);
+	}
+
 }

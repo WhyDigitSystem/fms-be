@@ -1387,7 +1387,9 @@ public class BasicMasterServiceImpl implements BasicMasterService {
 
 		return convertCustomerToResponseDTO(customerVO);
 	}
-
+	public String getNextCustomerCode() {
+	    return generateCustomerCode();
+	}
 	@Override
 	@Transactional(readOnly = true)
 	public List<CustomerResponseDTO> getCustomersByBranchAndOrgId(Long orgId, Long branchId) {
